@@ -7,7 +7,7 @@ DIGITS = "0123456789"
 SMALL_LAT_LETTERS = "abcdefghijklmnopqrstuvwxyz"
 CAP_LAT_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 SMALL_GREEK_LETTERS = "αβγδεζηθικλμνξοπρστυφχψωάέήίϊΐόύϋΰώ"
-CAP_GREEK_LETTERS = "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩΆΈΉΊΪΌΎΫΏ"
+CAP_GREEK_LETTERS = "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩΆΈΉΊΪΌΎΫΏ_"
 
 #Arithmitikes prakseis
 TOK_PLUS = 500
@@ -110,86 +110,94 @@ class Lex:
     def lex(self):
         recognized_string=''
         token.family=''
-        pinakas=[[0,1,2,TT_PLUS,TT_MINUS,TT_MUL,3,TT_MOD,TT_LPAREN,TT_ERROR,TT_RBRACKET,TT_ERROR,TT_COMMA,TT_COLON,4,5,6,7,8,TT_EOF,TT_ERROR],
-		         [E2,1,TT_ERROR,E2,E2,E2,E2,E2,E2,E2,E2,E2,E2,E2,E2,E2,E2,E2,E2,E2,E2],
-		         [E1,2,2,E1,E1,E1,E1,E1,E1,E1,E1,E1,E1,E1,E1,E1,E1,E1,E1,E1,E1],
-		         [TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_DIV,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR],
-		         [TT_ERROR,TT_ERROR,2,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_LBRACKET,TT_RBRACKET,TT_ERROR,TT_ERROR,TT_COMMENT,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR],
-		         [TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_EQUALS,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN,TT_ASSIGN],
-		         [TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_EQUAL,TT_LESS_THAN,TT_LESS_THAN,TT_LESS_THAN],
-		         [TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_EQUAL,TT_MORE_THAN,TT_MORE_THAN,TT_MORE_THAN],
-		         [TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_NOT_EQUAL,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR,TT_ERROR]]
-        putIn=0
+        trans_diagram= [ [0, 1, 2, TOK_PLUS, TOK_MINUS, TOK_MUL, TOK_DIV, TOK_EQUAL, 3, 4, 5, 6, TOK_ERROR, TOK_SEMICOLON, TOK_COMMA, TOK_OPEN_PAREN, TOK_CLOSE_PAREN, TOK_OPEN_BRACKET, TOK_CLOSE_BRACKET, TOK_DOUBLE_QUOTE, TOK_REF, TOK_EOF, TOK_ERROR]
+                        ,[E1, 1, 1, E1, E1 , E1, E1, E1, E1, E1, E1, E1, E1, E1, E1, E1, E1, E1, E1, E1, E1, E1, E1]
+                        ,[E2, TOK_ERROR, 2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2]
+                        ,[ TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN_EQUAL,TOK_LESS_THAN, TOK_NOT_EQUAL, TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN,TOK_LESS_THAN]
+                        ,[ TOK_MORE_THAN,  TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN_EQUAL, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN, TOK_MORE_THAN]
+                        ,[TOK_ERROR, TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ASSIGN, TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR]
+                        ,[6,6,6,6,6,6,6,6,6,6,6,6,0,6,6,6,6,6,6,6,6,TOK_ERROR,6] 
+        ]
         state=0   
         try:                   
-            while state>=0 and state<100:
+            while state>=0 and state<500:
                 self.current_char=f1.read(1)
                 if self.current_char in ' \t' :
                     putIn=0
                     family='whitespace'
                 elif self.current_char=='\n':
-                    putIn=0
+                    input_cat=0
                     family=''
+                elif self.current_char in SMALL_LAT_LETTERS:
+                    input_cat=1
+                elif self.current_char in SMALL_GREEK_LETTERS:
+                    input_cat=1
+                elif self.current_char in CAP_GREEK_LETTERS:
+                    input_cat=1
+                elif self.current_char in CAP_LAT_LETTERS:
+                    input_cat=1
                 elif self.current_char in DIGITS:
-                    putIn=1
+                    input_cat=2
                     family='number'
-                elif self.current_char in CAP_LETTERS:
-                    putIn=2
-                elif self.current_char in LOW_LETTERS:
-                    putIn=2
                 elif self.current_char=='+':
-                    putIn=3
-                    family='addOperator'
+                    input_cat=3
+                    family='arithmeticOperator'
                 elif self.current_char=='-':
-                    putIn=4
-                    family='addOperator'
+                    input_cat=4
+                    family='arithmeticOperator'
                 elif self.current_char=='*':
-                    putIn=5
-                    family='mulOperator'
+                    input_cat=5
+                    family='arithmeticOperator'
                 elif self.current_char=='/':
-                    putIn=6
-                    family='mulOperator'
-                elif self.current_char=='%':
-                    putIn=7
-                    family='mulOperator'
+                    input_cat=6
+                    family='arithmeticOperator'
+                elif self.current_char=='=':
+                    input_cat=7
+                    family='comparisonOperator'
+                elif self.current_char=='<':
+                    input_cat=8
+                elif self.current_char=='>':
+                    input_cat=9
+                elif self.current_char==':':
+                    input_cat=10
+                elif self.current_char=='{':
+                    input_cat=11
+                elif self.current_char=='}':
+                    input_cat=12
+                elif self.current_char==';':
+                    input_cat=13
+                    family='delimiter'
+                elif self.current_char==',':
+                    input_cat=14
+                    family='delimiter'
                 elif self.current_char=='(':
-                    putIn=8
+                    input_cat=15
                     family='groupSymbol'
                 elif self.current_char==')':
-                    putIn=9
+                    input_cat=16
                     family='groupSymbol'
-                elif self.current_char=='{':
-                    putIn=10
+                elif self.current_char=='[':
+                    input_cat=17
                     family='groupSymbol'
-                elif self.current_char=='}':
-                    putIn=11
+                elif self.current_char==']':
+                    input_cat=18
                     family='groupSymbol'
-                elif self.current_char==',':
-                    putIn=12
-                    family='delimiter'
-                elif self.current_char==':':
-                    putIn=13
-                    family='delimiter'
-                elif self.current_char=='#':
-                    putIn=14
-                elif self.current_char=='=':
-                    putIn=15
-                elif self.current_char=='<':
-                    putIn=16
-                elif self.current_char=='>':
-                    putIn=17
-                elif self.current_char=='!':
-                    putIn=18
+                elif self.current_char=='"':
+                    input_cat=19
+                    family='quote'
+                elif self.current_char=='%':
+                    input_cat=20
+                    family='passbyReference'
                 elif not self.current_char:
-                    putIn=19
+                    input_cat=21
                 else:
-                    putIn=20
+                    input_cat=22
 
                 recognized_string+=self.current_char
                     
-                state=pinakas[state][putIn]
+                state=pinakas[state][input_cat]
 
-            if (state == TT_LESS_THAN or state == TT_MORE_THAN or state == E1 or state == E2 or state == TT_ASSIGN):
+            if (state == TOK_LESS_THAN or state == TOK_MORE_THAN or state == E1 or state == E2 or state == TOK_ASSIGN):
                 recognized_string=recognized_string[:-1]  # Remove the last character
                 current_position=f1.tell()
                 if (current_position>1): f1.seek(current_position-1)# Move the file pointer back by one character
@@ -198,61 +206,101 @@ class Lex:
                 if c=='\n':
                     self.current_line+=1
                 
-            if state>=100:
-                if (state==TT_COMMENT):
-                    family='comment'
-                if (state==TT_ASSIGN):
+            if state>=500:
+                if (state==TOK_ASSIGN):
                     family='assignment'
-                if (state==TT_LESS_THAN or state==TT_MORE_THAN or state==TT_EQUALS or state==TT_LESS_EQUAL or state==TT_MORE_EQUAL or state==TT_NOT_EQUAL):
+                if (state==TOK_LESS_THAN or state==TOK_MORE_THAN or state==TOK_EQUALS or state==TOK_LESS_THAN_EQUAL or state==TOK_MORE_THAN_EQUAL or state==TOK_NOT_EQUAL):
                     family='relOperator'
             elif state==E1:
-                if 'main' in recognized_string:
-                    recognized_string='main'
+                if 'πρόγραμμα' in recognized_string:
+                    recognized_string='πρόγραμμα'
                     family='keyword'
-                elif 'elif' in recognized_string:
-                    recognized_string='elif'
+                elif 'δήλωση' in recognized_string:
+                    recognized_string='δήλωση'
                     family='keyword'
-                elif 'while' in recognized_string:
-                    recognized_string='while'
+                elif 'εάν' in recognized_string:
+                    recognized_string='εάν'
                     family='keyword'
-                elif 'print' in recognized_string:
-                    recognized_string='print'
+                elif 'τότε' in recognized_string:
+                    recognized_string='τότε'
                     family='keyword'
-                elif 'return' in recognized_string:
-                    recognized_string='return'
+                elif 'αλλιώς' in recognized_string:
+                    recognized_string='αλλιώς'
                     family='keyword'
-                elif 'input' in recognized_string:
-                    recognized_string='input'
+                elif 'εάν_τέλος' in recognized_string:
+                    recognized_string='εάν_τέλος'
                     family='keyword'
-                elif 'and' in recognized_string:
-                    recognized_string='and'
+                elif 'επανάλαβε' in recognized_string:
+                    recognized_string='επανάλαβε'
                     family='keyword'
-                elif '#def' in recognized_string:
-                    recognized_string='#def'
+                elif 'μέχρι' in recognized_string:
+                    recognized_string='μέχρι'
                     family='keyword'
-                elif 'global' in recognized_string:
-                    recognized_string='global'
+                elif 'όσο' in recognized_string:
+                    recognized_string='όσο'
                     family='keyword'
-                elif 'if' in recognized_string:
-                    recognized_string='if'
+                elif 'όσο_τέλος' in recognized_string:
+                    recognized_string='όσο_τέλος'
                     family='keyword'
-                elif '#int' in recognized_string:
-                    recognized_string='#int'
+                elif 'για' in recognized_string:
+                    recognized_string='για'
                     family='keyword'
-                elif 'or' in recognized_string:
-                    recognized_string='or'
+                elif 'εώς' in recognized_string:
+                    recognized_string='εώς'
                     family='keyword'
-                elif 'else' in recognized_string:
-                    recognized_string='else'
+                elif 'με_βήμα' in recognized_string:
+                    recognized_string='με_βήμα'
                     family='keyword'
-                elif 'not' in recognized_string:
-                    recognized_string='not'
+                elif 'για_τέλος' in recognized_string:
+                    recognized_string='για_τέλος'
                     family='keyword'
-                elif 'def' in recognized_string:
-                    recognized_string='def'
+                elif 'διάβασε' in recognized_string:
+                    recognized_string='διάβασε'
                     family='keyword'
-                elif 'int' in recognized_string:
-                    recognized_string='int'
+                elif 'γράψε' in recognized_string:
+                    recognized_string='γράψε'
+                    family='keyword'
+                elif 'συνάρτηση' in recognized_string:
+                    recognized_string='συνάρτηση'
+                    family='keyword'
+                elif 'διαδικασία' in recognized_string:
+                    recognized_string='διαδικασία'
+                    family='keyword'
+                elif 'διαπροσωπεία' in recognized_string:
+                    recognized_string='διαπροσωπεία'
+                    family='keyword'
+                elif 'είσοδος' in recognized_string:
+                    recognized_string='είσοδος'
+                    family='keyword'    
+                elif 'έξοδος' in recognized_string:
+                    recognized_string='έξοδος'
+                    family='keyword'
+                elif 'αρχή_συνάρτησης' in recognized_string:
+                    recognized_string='αρχή_συνάρτησης'
+                    family='keyword'
+                elif 'τέλος_συνάρτησης' in recognized_string:
+                    recognized_string='τέλος_συνάρτησης'
+                    family='keyword'
+                elif 'αρχή_διαδικασίας' in recognized_string:
+                    recognized_string='αρχή_διαδικασίας'
+                    family='keyword'
+                elif 'τέλος_διαδικασίας' in recognized_string:
+                    recognized_string='τέλος_διαδικασίας'
+                    family='keyword'
+                elif 'ή' in recognized_string:
+                    recognized_string='ή'
+                    family='keyword'
+                elif 'και' in recognized_string:
+                    recognized_string='και'
+                    family='keyword'
+                elif 'όχι' in recognized_string:
+                    recognized_string='όχι'
+                    family='keyword'
+                elif 'in' in recognized_string:
+                    recognized_string='in'
+                    family='keyword'
+                elif 'inout' in recognized_string:
+                    recognized_string='inout'
                     family='keyword'
                 else:
                     recognized_string = recognized_string.replace(" ", "").replace("\t", "").replace("\n", "")
