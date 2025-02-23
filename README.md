@@ -1,2 +1,2 @@
 # Metafrastes
-This is the repository for the "Metafrastes" course and contains all the files about our project
+This is the repository for the course of "Metafrastes" and the files contained are all relevant to the course and its project.
