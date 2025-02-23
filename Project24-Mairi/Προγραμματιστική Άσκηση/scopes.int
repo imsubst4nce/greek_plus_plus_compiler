@@ -1,0 +1,4 @@
+max3 ::: x(12, Nesting Level: 1), y(16, Nesting Level: 1), z(20, Nesting Level: 1), m(24, Nesting Level: 1) 
+divides ::: x(12, Nesting Level: 2), y(16, Nesting Level: 2) 
+isPrime ::: x(12, Nesting Level: 1), i(16, Nesting Level: 1), divides(20, Nesting Level: 1) 
+program ::: counterFunctionCalls(12, Nesting Level: 0), max3(16, Nesting Level: 0), isPrime(20, Nesting Level: 0), i(24, Nesting Level: 0) 

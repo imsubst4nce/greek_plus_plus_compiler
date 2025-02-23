@@ -1,0 +1,25 @@
+programa natalia
+diloseis 
+	i,j : akeraios;
+	x,y : pragmatikos;
+	k   : akeraios;
+
+	synartisi inc(a, %b): akeraios
+	diaprosopia
+	eisodos 
+		a: akeraios;
+	exodos
+		b: akeraios;
+	diloseis
+		ttt: akeraios;
+		test: pragmatikos;
+	arxi
+		b:= a+1;
+		inc:=a+1
+	telossynartisis
+	
+arxi
+	x := 10;
+	y := x + z * z;
+	y := inc(%a,%b)
+telos
