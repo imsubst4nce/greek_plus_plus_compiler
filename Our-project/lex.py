@@ -6,7 +6,7 @@ import sys
 DIGITS = "0123456789"
 SMALL_LAT_LETTERS = "abcdefghijklmnopqrstuvwxyz"
 CAP_LAT_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-SMALL_GREEK_LETTERS = "αβγδεζηθικλμνξοπρστυφχψωάέήίϊΐόύϋΰώ"
+SMALL_GREEK_LETTERS = "αβγδεζηθικλμνξοπρσςτυφχψωάέήίϊΐόύϋΰώ"
 CAP_GREEK_LETTERS = "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩΆΈΉΊΪΌΎΫΏ_"
 
 #Arithmitikes prakseis
@@ -118,12 +118,13 @@ class Lex:
                         ,[TOK_ERROR, TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ASSIGN, TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR,TOK_ERROR]
                         ,[6,6,6,6,6,6,6,6,6,6,6,6,0,6,6,6,6,6,6,6,6,TOK_ERROR,6] 
         ]
-        state=0   
+        state=0 
+        input_cat=0
         try:                   
             while state>=0 and state<500:
                 self.current_char=f1.read(1)
                 if self.current_char in ' \t' :
-                    putIn=0
+                    input_cat=0
                     family='whitespace'
                 elif self.current_char=='\n':
                     input_cat=0
@@ -195,7 +196,7 @@ class Lex:
 
                 recognized_string+=self.current_char
                     
-                state=pinakas[state][input_cat]
+                state=trans_diagram[state][input_cat]
 
             if (state == TOK_LESS_THAN or state == TOK_MORE_THAN or state == E1 or state == E2 or state == TOK_ASSIGN):
                 recognized_string=recognized_string[:-1]  # Remove the last character
@@ -209,7 +210,7 @@ class Lex:
             if state>=500:
                 if (state==TOK_ASSIGN):
                     family='assignment'
-                if (state==TOK_LESS_THAN or state==TOK_MORE_THAN or state==TOK_EQUALS or state==TOK_LESS_THAN_EQUAL or state==TOK_MORE_THAN_EQUAL or state==TOK_NOT_EQUAL):
+                if (state==TOK_LESS_THAN or state==TOK_MORE_THAN or state==TOK_EQUAL or state==TOK_LESS_THAN_EQUAL or state==TOK_MORE_THAN_EQUAL or state==TOK_NOT_EQUAL):
                     family='relOperator'
             elif state==E1:
                 if 'πρόγραμμα' in recognized_string:
@@ -302,6 +303,12 @@ class Lex:
                 elif 'inout' in recognized_string:
                     recognized_string='inout'
                     family='keyword'
+                elif 'αρχή_προγράμματος' in recognized_string:
+                    recognized_string='αρχή_προγράμματος'
+                    family='keyword'
+                elif 'τέλος_προγράμματος' in recognized_string:
+                    recognized_string='τέλος_προγράμματος'
+                    family='keyword'
                 else:
                     recognized_string = recognized_string.replace(" ", "").replace("\t", "").replace("\n", "")
                     family='identifier'
@@ -321,17 +328,16 @@ if __name__ == "__main__":
 
     file_name = sys.argv[1]
     try:
-        with open(file_name, 'r', encoding="utf-8") as f1:
+        with open(file_name, 'r', encoding='utf-8') as f1:
             token = Token("", "", 1)
             lexer = Lex(token, file_name)
             while True:
+                
                 token = lexer.lex()
-                if token.type == TOK_EOF:
+                if token.family == 'n':
                     break
                 print(token)
     except FileNotFoundError:
-        print(f"File {file_name} not found.")
-        sys.exit(1)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        sys.exit(1)
+                    print(f"File '{file_name}' not found")
+    except IOError as e:
+        print(f"Error reading file: {e}")
