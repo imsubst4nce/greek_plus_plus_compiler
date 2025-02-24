@@ -213,7 +213,13 @@ class Lex:
                 if (state==TOK_LESS_THAN or state==TOK_MORE_THAN or state==TOK_EQUAL or state==TOK_LESS_THAN_EQUAL or state==TOK_MORE_THAN_EQUAL or state==TOK_NOT_EQUAL):
                     family='relOperator'
             elif state==E1:
-                if 'πρόγραμμα' in recognized_string:
+                if 'αρχή_προγράμματος' in recognized_string:
+                    recognized_string='αρχή_προγράμματος'
+                    family='keyword'
+                elif 'τέλος_προγράμματος' in recognized_string:
+                    recognized_string='τέλος_προγράμματος'
+                    family='keyword'
+                elif 'πρόγραμμα' in recognized_string:
                     recognized_string='πρόγραμμα'
                     family='keyword'
                 elif 'δήλωση' in recognized_string:
@@ -261,6 +267,18 @@ class Lex:
                 elif 'γράψε' in recognized_string:
                     recognized_string='γράψε'
                     family='keyword'
+                elif 'αρχή_συνάρτησης' in recognized_string:
+                    recognized_string='αρχή_συνάρτησης'
+                    family='keyword'
+                elif 'τέλος_συνάρτησης' in recognized_string:
+                    recognized_string='τέλος_συνάρτησης'
+                    family='keyword'
+                elif 'αρχή_διαδικασίας' in recognized_string:
+                    recognized_string='αρχή_διαδικασίας'
+                    family='keyword'
+                elif 'τέλος_διαδικασίας' in recognized_string:
+                    recognized_string='τέλος_διαδικασίας'
+                    family='keyword'
                 elif 'συνάρτηση' in recognized_string:
                     recognized_string='συνάρτηση'
                     family='keyword'
@@ -276,18 +294,6 @@ class Lex:
                 elif 'έξοδος' in recognized_string:
                     recognized_string='έξοδος'
                     family='keyword'
-                elif 'αρχή_συνάρτησης' in recognized_string:
-                    recognized_string='αρχή_συνάρτησης'
-                    family='keyword'
-                elif 'τέλος_συνάρτησης' in recognized_string:
-                    recognized_string='τέλος_συνάρτησης'
-                    family='keyword'
-                elif 'αρχή_διαδικασίας' in recognized_string:
-                    recognized_string='αρχή_διαδικασίας'
-                    family='keyword'
-                elif 'τέλος_διαδικασίας' in recognized_string:
-                    recognized_string='τέλος_διαδικασίας'
-                    family='keyword'
                 elif 'ή' in recognized_string:
                     recognized_string='ή'
                     family='keyword'
@@ -302,12 +308,6 @@ class Lex:
                     family='keyword'
                 elif 'inout' in recognized_string:
                     recognized_string='inout'
-                    family='keyword'
-                elif 'αρχή_προγράμματος' in recognized_string:
-                    recognized_string='αρχή_προγράμματος'
-                    family='keyword'
-                elif 'τέλος_προγράμματος' in recognized_string:
-                    recognized_string='τέλος_προγράμματος'
                     family='keyword'
                 else:
                     recognized_string = recognized_string.replace(" ", "").replace("\t", "").replace("\n", "")
