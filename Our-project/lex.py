@@ -314,6 +314,8 @@ class Lex:
                     family='identifier'
             elif state==E2:
                 family='number'
+            elif state==TOK_EOF:
+                family='EOF'
             return Token(recognized_string,family,self.current_line)
 
         except FileNotFoundError:
@@ -331,12 +333,11 @@ if __name__ == "__main__":
         with open(file_name, 'r', encoding='utf-8') as f1:
             token = Token("", "", 1)
             lexer = Lex(token, file_name)
-            while True:
-                
-                token = lexer.lex()
-                if token.family == 'n':
-                    break
+            token = lexer.lex()
+            while token.family != 'EOF':
                 print(token)
+                token = lexer.lex()
+                
     except FileNotFoundError:
                     print(f"File '{file_name}' not found")
     except IOError as e:
