@@ -101,11 +101,21 @@ class Token:
 
 
 class Lex:
-    def __init__(self, token ,file_name):
-        self.token=token
-        self.file_name=file_name
-        self.current_char=None
-        self.current_line=1
+    def __init__(self, token, file_name):
+        self.token = token
+        self.file_name = file_name
+        self.current_char = None
+        self.current_line = 1
+        
+        # Open file inside class
+        try:
+            self.file = open(file_name, 'r', encoding='utf-8')  
+        except FileNotFoundError:
+            raise LexicalError(f"File '{file_name}' not found")
+        except IOError as e:
+            raise LexicalError(f"Error reading file: {e}")
+
+
         
     def lex(self):
         recognized_string=''
@@ -122,7 +132,11 @@ class Lex:
         input_cat=0
         try:                   
             while state>=0 and state<500:
-                self.current_char=f1.read(1)
+                self.current_char = self.file.read(1)  # Read one character
+            
+                if not self.current_char:  # EOF detected
+                    return Token("", "EOF", self.current_line)  # Stop parsing
+
                 if self.current_char in ' \t' :
                     input_cat=0
                     family='whitespace'
@@ -200,8 +214,8 @@ class Lex:
 
             if (state == TOK_LESS_THAN or state == TOK_MORE_THAN or state == E1 or state == E2 or state == TOK_ASSIGN):
                 recognized_string=recognized_string[:-1]  # Remove the last character
-                current_position=f1.tell()
-                if (current_position>1): f1.seek(current_position-1)# Move the file pointer back by one character
+                current_position=self.file.tell()
+                if (current_position>1): self.file.seek(current_position-1)# Move the file pointer back by one character
 
             for c in recognized_string:
                 if c=='\n':
@@ -314,8 +328,6 @@ class Lex:
                     family='identifier'
             elif state==E2:
                 family='number'
-            elif state==TOK_EOF:
-                family='EOF'
             return Token(recognized_string,family,self.current_line)
 
         except FileNotFoundError:
@@ -329,16 +341,20 @@ if __name__ == "__main__":
         sys.exit(1)
 
     file_name = sys.argv[1]
+
     try:
-        with open(file_name, 'r', encoding='utf-8') as f1:
-            token = Token("", "", 1)
-            lexer = Lex(token, file_name)
+        token = Token("", "", 1)
+        lexer = Lex(token, file_name)
+
+        while True:
             token = lexer.lex()
-            while token.family != 'EOF':
-                print(token)
-                token = lexer.lex()
-                
+            if token.family == "EOF":  # Stop when EOF is reached
+                break
+            print(token)
+
+        lexer.file.close()  # Close the file after processing
+
     except FileNotFoundError:
-                    print(f"File '{file_name}' not found")
+        print(f"File '{file_name}' not found")
     except IOError as e:
         print(f"Error reading file: {e}")
