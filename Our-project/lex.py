@@ -212,7 +212,7 @@ class Lex:
                     
                 state=trans_diagram[state][input_cat]
 
-            if (state == TOK_LESS_THAN or state == TOK_MORE_THAN or state == E1 or state == E2 or state == TOK_ASSIGN):
+            if (state == TOK_LESS_THAN or state == TOK_MORE_THAN or state == E1 or state == E2): #
                 recognized_string=recognized_string[:-1]  # Remove the last character
                 current_position=self.file.tell()
                 if (current_position>1): self.file.seek(current_position-1)# Move the file pointer back by one character
@@ -225,7 +225,7 @@ class Lex:
                 if (state==TOK_ASSIGN):
                     family='assignment'
                 if (state==TOK_LESS_THAN or state==TOK_MORE_THAN or state==TOK_EQUAL or state==TOK_LESS_THAN_EQUAL or state==TOK_MORE_THAN_EQUAL or state==TOK_NOT_EQUAL):
-                    family='relOperator'
+                    family='relationalOperator'
             elif state==E1:
                 if 'αρχή_προγράμματος' in recognized_string:
                     recognized_string='αρχή_προγράμματος'
