@@ -1,5 +1,4 @@
 import sys
-import re
 from enum import Enum, auto
 
 # TOKEN FAMILIES 
@@ -27,6 +26,16 @@ KEYWORDS = {
     "διαπροσωπεία", "είσοδος", "έξοδος", "ή", "και", "όχι"
 }
 
+ops_and_symbols = {
+    '+': TokenType.OPERATOR, '-': TokenType.OPERATOR, '*': TokenType.OPERATOR, '/': TokenType.OPERATOR,
+    ';': TokenType.DELIMITER, ',': TokenType.DELIMITER,
+    '(': TokenType.GROUP_SYMBOL, ')': TokenType.GROUP_SYMBOL,
+    '[': TokenType.GROUP_SYMBOL, ']': TokenType.GROUP_SYMBOL,
+}
+
+whitespaces = {' ', '\t', '\r', '\n'}
+
+# KLASI TOKEN
 class Token:
     def __init__(self, recognized_string, family, line_number):
         self.recognized_string = recognized_string
@@ -34,9 +43,9 @@ class Token:
         self.line_number = line_number
 
     def __str__(self):
-        return f'{self.recognized_string} family:"{self.family.name}", line: {self.line_number}'
+        return f'{self.recognized_string}\tfamily:"{self.family.name}",\tline: {self.line_number}'
 
-# LEKTIKOS ANALYTIS
+# KLASI LEKTIKOU ANALYTI
 class Lex:
     def __init__(self, file_name):
         self.file_name = file_name
@@ -54,48 +63,61 @@ class Lex:
     def next_char(self):
         self.current_char = self.file.read(1)
         return self.current_char
-
+    
+    def next_line(self):
+        self.current_line += 1
+        return self.current_line
+    
+    # PROSPERNAEI KENOUS XARAKTIRES
     def skip_whitespace(self):
-        #SKIPAREI KENOUS XARAKTIRES
-        while self.current_char in {' ', '\t', '\r', '\n'}:
+        while self.current_char in whitespaces:
             if self.current_char == '\n':
-                self.current_line += 1
+                self.next_line()
             self.next_char()
 
+    # H SHMANTIKI SYNARTHSH POU THA EKSAGEI TO TOKEN
     def get_token(self):
-        #H SHMANTIKI SYNARTHSH POU THA EKSAGEI TO TOKEN
+        # TSEKAREI GIA WHITESPACE
         self.skip_whitespace()
 
-        if not self.current_char:  # EOF
+        if not self.current_char:  # FTASAME SE EOF
             return Token("", TokenType.EOF, self.current_line)
 
         # identifiers kai keywords
         if self.current_char.isalpha() or self.current_char == '_':
-            leksi = self.current_char
+            word = self.current_char
             self.next_char()
             while self.current_char and (self.current_char.isalnum() or self.current_char == '_'):
-                leksi += self.current_char
+                word += self.current_char
                 self.next_char()
-            token_type = TokenType.KEYWORD if leksi in KEYWORDS else TokenType.IDENTIFIER
-            return Token(leksi, token_type, self.current_line)
+            token_type = TokenType.KEYWORD if word in KEYWORDS else TokenType.IDENTIFIER
+            return Token(word, token_type, self.current_line)
 
         # akeraioi
         if self.current_char.isdigit():
-            leksi = self.current_char
+            word = self.current_char
             self.next_char()
             while self.current_char and self.current_char.isdigit():
-                leksi += self.current_char
+                word += self.current_char
                 self.next_char()
-            return Token(leksi, TokenType.NUMBER, self.current_line)
+            return Token(word, TokenType.NUMBER, self.current_line)
 
-        # Relational Operators: <, >, <=, =, >=, <>
+        # relOperators: <, >, <=, =, >=, <>
         if self.current_char in {'<', '>', '='}:
-            leksi = self.current_char
-            self.next_char()
-            if (leksi in {'<', '>'} and self.current_char == '=') or (leksi == '<' and self.current_char == '>'):  # <=, >=, <>
-                leksi += self.current_char
+            word = self.current_char
+            line = self.current_line
+            next_word = self.next_char() # epomeni leksi
+            
+            if (next_word == ' '):
                 self.next_char()
-            return Token(leksi, TokenType.RELATIONAL_OPERATOR, self.current_line)
+                return Token(word, TokenType.RELATIONAL_OPERATOR, line)
+            elif (word in {'<', '>'} and next_word == '=') or (word == '<' and next_word == '>'):  # <=, >=, <>
+                word += next_word
+                self.next_char()
+                return Token(word, TokenType.RELATIONAL_OPERATOR, line)
+            word += next_word # THELEI DIORTHOSI!!!!
+            self.next_char() # AN EXW PARAPANW APO DYO WORDS?
+            return Token(word, TokenType.ERROR, line)
 
         # assignment
         if self.current_char == ':':
@@ -111,25 +133,20 @@ class Lex:
             return Token("%", TokenType.PASSBYREFERENCE, self.current_line)
             
         # arithmitikes prakseis kai sumbola
-        token_map = {
-            '+': TokenType.OPERATOR, '-': TokenType.OPERATOR, '*': TokenType.OPERATOR, '/': TokenType.OPERATOR,
-            ';': TokenType.DELIMITER, ',': TokenType.DELIMITER,
-            '(': TokenType.GROUP_SYMBOL, ')': TokenType.GROUP_SYMBOL,
-            '[': TokenType.GROUP_SYMBOL, ']': TokenType.GROUP_SYMBOL,
-        }
-        
-        if self.current_char in token_map:
-            leksi = self.current_char
-            token_type = token_map[self.current_char]
+        if self.current_char in ops_and_symbols:
+            word = self.current_char
+            token_type = ops_and_symbols.get(self.current_char)
             self.next_char()
-            return Token(leksi, token_type, self.current_line)
+            return Token(word, token_type, self.current_line)
 
-        #sxolia
+        # sxolia
         if self.current_char == '{':
             while self.current_char and self.current_char != '}':
+                if self.current_char == "\n": # se periptwsi pou to sxolio einai pollaples grammes prepei na allazei grammi
+                    self.skip_whitespace()
                 self.next_char()
             self.next_char()  
-            return self.get_token()  
+            return self.get_token()
 
         # mi dektoi xaraktires
         error_char = self.current_char
@@ -138,13 +155,17 @@ class Lex:
 
     def analyze(self):
         tokens = []
+
         while True:
             token = self.get_token()
+            
             if token.family == TokenType.EOF:
-                break  
-            print(token)  
-            tokens.append(token)
-
+                print("-- Reached EOF --")
+                break
+            
+            tokens.append(token) # DEN THELOUME TO EOF
+            print(token)
+        
         self.file.close()  
         return tokens
 
