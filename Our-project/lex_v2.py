@@ -2,7 +2,7 @@
 # LEKTIKOS ANALYTIS #
 #####################
 
-# A.M 5064 KOUTOULIS XRHSTOS
+# A.M 5064 KOUTOULIS CHRISTOS
 # A.M 5108 KOUTSONIKOLIS NIKOLAOS
 # PYTHON VERSION: 3.11
 
@@ -20,7 +20,7 @@ class TokenFamily(Enum):
     RELATIONAL_OPERATOR = auto()
     DELIMITER = auto()
     GROUP_SYMBOL = auto()
-    QUOTE = auto()
+    #QUOTE = auto() to vlepoume
     COMMENT = auto()
     PASSBYREFERENCE = auto()
     EOF = auto()
