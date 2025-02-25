@@ -1,9 +1,17 @@
+#####################
+# LEKTIKOS ANALYTIS #
+#####################
+
+# A.M 5064 KOUTOULIS XRHSTOS
+# A.M 5108 KOUTSONIKOLIS NIKOLAOS
+# PYTHON VERSION: 3.11
+
 import sys
 from enum import Enum, auto
 
 # TOKEN FAMILIES 
-class TokenType(Enum):
-    NUMBER = auto()
+class TokenFamily(Enum):
+    NUMBER = 0 # an ta valw ola auto ksekinaei apo 1
     IDENTIFIER = auto()
     KEYWORD = auto()
     OPERATOR = auto()
@@ -26,15 +34,18 @@ KEYWORDS = {
     "διαπροσωπεία", "είσοδος", "έξοδος", "ή", "και", "όχι"
 }
 
+# PRAKSEIS KAI SYMVOLA
 OPS_AND_SYMBOLS = {
-    '+': TokenType.OPERATOR, '-': TokenType.OPERATOR, '*': TokenType.OPERATOR, '/': TokenType.OPERATOR,
-    ';': TokenType.DELIMITER, ',': TokenType.DELIMITER,
-    '(': TokenType.GROUP_SYMBOL, ')': TokenType.GROUP_SYMBOL,
-    '[': TokenType.GROUP_SYMBOL, ']': TokenType.GROUP_SYMBOL,
+    '+': TokenFamily.OPERATOR, '-': TokenFamily.OPERATOR, '*': TokenFamily.OPERATOR, '/': TokenFamily.OPERATOR,
+    ';': TokenFamily.DELIMITER, ',': TokenFamily.DELIMITER,
+    '(': TokenFamily.GROUP_SYMBOL, ')': TokenFamily.GROUP_SYMBOL,
+    '[': TokenFamily.GROUP_SYMBOL, ']': TokenFamily.GROUP_SYMBOL,
 }
 
+# KENOI XARAKTIRES
 WHITESPACES = {' ', '\t', '\r', '\n'}
 
+# ANWTATOS ARITHMOS XARAKTIRWN LEKSIS
 MAX_WORD_SIZE = 30
 
 # KLASI TOKEN
@@ -83,7 +94,7 @@ class Lex:
         self.skip_whitespace()
 
         if not self.current_char:  # FTASAME SE EOF
-            return Token("", TokenType.EOF, self.current_line)
+            return Token("", TokenFamily.EOF, self.current_line)
 
         # identifiers kai keywords
         if self.current_char.isalpha() or self.current_char == '_':
@@ -94,7 +105,7 @@ class Lex:
                 self.next_char()
                 if(len(word) >= MAX_WORD_SIZE):
                     break
-            token_type = TokenType.KEYWORD if word in KEYWORDS else TokenType.IDENTIFIER
+            token_type = TokenFamily.KEYWORD if word in KEYWORDS else TokenFamily.IDENTIFIER
             return Token(word, token_type, self.current_line)
 
         # akeraioi
@@ -106,7 +117,7 @@ class Lex:
                 self.next_char()
                 if(len(word) >= MAX_WORD_SIZE):
                     break
-            return Token(word, TokenType.NUMBER, self.current_line)
+            return Token(word, TokenFamily.NUMBER, self.current_line)
 
         # relOperators: <, >, <=, =, >=, <>
         if self.current_char in {'<', '>', '='}:
@@ -116,27 +127,27 @@ class Lex:
 
             if (next_word == ' '):
                 self.next_char()
-                return Token(word, TokenType.RELATIONAL_OPERATOR, line)
+                return Token(word, TokenFamily.RELATIONAL_OPERATOR, line)
             elif (word in {'<', '>'} and next_word == '=') or (word == '<' and next_word == '>'):  # <=, >=, <>
                 word += next_word
                 self.next_char()
-                return Token(word, TokenType.RELATIONAL_OPERATOR, line)
+                return Token(word, TokenFamily.RELATIONAL_OPERATOR, line)
             word += next_word # THELEI DIORTHOSI!!!!
             self.next_char() # AN EXW PARAPANW APO DYO WORDS?
-            return Token(word, TokenType.ERROR, line)
+            return Token(word, TokenFamily.ERROR, line)
 
         # assignment
         if self.current_char == ':':
             self.next_char()
             if self.current_char == '=':
                 self.next_char()
-                return Token(":=", TokenType.ASSIGNMENT, self.current_line)
-            return Token(":", TokenType.ERROR, self.current_line)  # Invalid ':'
+                return Token(":=", TokenFamily.ASSIGNMENT, self.current_line)
+            return Token(":", TokenFamily.ERROR, self.current_line)  # Invalid ':'
        
         # perasma me anafora
         if self.current_char == '%':
             self.next_char()
-            return Token("%", TokenType.PASSBYREFERENCE, self.current_line)
+            return Token("%", TokenFamily.PASSBYREFERENCE, self.current_line)
             
         # arithmitikes prakseis kai sumbola
         if self.current_char in OPS_AND_SYMBOLS:
@@ -157,7 +168,7 @@ class Lex:
         # mi dektoi xaraktires
         error_char = self.current_char
         self.next_char()
-        return Token(error_char, TokenType.ERROR, self.current_line)
+        return Token(error_char, TokenFamily.ERROR, self.current_line)
 
     def analyze(self):
         tokens = []
@@ -165,7 +176,7 @@ class Lex:
         while True:
             token = self.get_token()
             
-            if token.family == TokenType.EOF:
+            if token.family == TokenFamily.EOF:
                 print("-- Reached EOF --")
                 break
             
