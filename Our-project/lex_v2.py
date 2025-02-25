@@ -127,14 +127,13 @@ class Lex:
 
             if (next_word == ' '):
                 self.next_char()
-                return Token(word, TokenFamily.RELATIONAL_OPERATOR, line)
             elif (word in {'<', '>'} and next_word == '=') or (word == '<' and next_word == '>'):  # <=, >=, <>
                 word += next_word
                 self.next_char()
-                return Token(word, TokenFamily.RELATIONAL_OPERATOR, line)
-            word += next_word # THELEI DIORTHOSI!!!!
-            self.next_char() # AN EXW PARAPANW APO DYO WORDS?
-            return Token(word, TokenFamily.ERROR, line)
+            return Token(word, TokenFamily.RELATIONAL_OPERATOR, line)
+            # word += next_word # THELEI DIORTHOSI!!!!
+            # self.next_char() # AN EXW PARAPANW APO DYO WORDS?
+            # return Token(word, TokenFamily.ERROR, line)
 
         # assignment
         if self.current_char == ':':
