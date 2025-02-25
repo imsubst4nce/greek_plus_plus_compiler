@@ -34,8 +34,23 @@ class Syntax:
         self.next_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
             self.error_type(TokenFamily.IDENTIFIER)
-
         self.programblock()
+
+    
+    def programblock(self):
+        self.declarations()
+        self.subprograms()
+        self.next_token()
+        if self.current_token.recognized_string != "αρχή_προγράμματος":
+            self.error("αρχή_προγράμματος")
+        self.next_token()
+        self.sequence()
+        self.next_token()
+        if self.current_token.recognized_string != "τέλος_προγράμματος":
+            self.error("τέλος_προγράμματος")
+        
+    
+            
 
 
 # Main function
