@@ -2,7 +2,7 @@
 # LEKTIKOS ANALYTIS #
 #####################
 
-# A.M 5064 KOUTOULIS XRHSTOS
+# A.M 5064 KOUTOULIS CHRISTOS
 # A.M 5108 KOUTSONIKOLIS NIKOLAOS
 # PYTHON VERSION: 3.11
 
@@ -19,7 +19,7 @@ class TokenFamily(Enum):
     RELATIONAL_OPERATOR = auto()
     DELIMITER = auto()
     GROUP_SYMBOL = auto()
-    QUOTE = auto()
+    #QUOTE = auto() exw tin entupwsi pws quotes telika den uparxoun. den uparxei pouthena sthn grammatiki kai leei o mono dektos typos einai o akeraios 
     COMMENT = auto()
     PASSBYREFERENCE = auto()
     EOF = auto()
@@ -31,7 +31,8 @@ KEYWORDS = {
     "επανάλαβε", "μέχρι", "όσο", "όσο_τέλος", "για", "εώς", "με_βήμα",
     "για_τέλος", "διάβασε", "γράψε", "αρχή_συνάρτησης", "τέλος_συνάρτησης",
     "αρχή_διαδικασίας", "τέλος_διαδικασίας", "συνάρτηση", "διαδικασία",
-    "διαπροσωπεία", "είσοδος", "έξοδος", "ή", "και", "όχι"
+    "διαπροσωπεία", "είσοδος", "έξοδος", "ή", "και", "όχι",
+    "αρχή_προγράμματος","τέλος_προγράμματος", "εκτέλεσε"
 }
 
 # PRAKSEIS KAI SYMVOLA
