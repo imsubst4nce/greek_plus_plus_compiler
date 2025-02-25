@@ -9,6 +9,7 @@
 import sys
 from enum import Enum, auto
 
+# ---------------- TOKEN DECLARATIONS ---------------- #
 # TOKEN FAMILIES 
 class TokenFamily(Enum):
     NUMBER = 0 # an ta valw ola auto ksekinaei apo 1
@@ -48,6 +49,8 @@ WHITESPACES = {' ', '\t', '\r', '\n'}
 # ANWTATOS ARITHMOS XARAKTIRWN LEKSIS
 MAX_WORD_SIZE = 30
 
+# ---------------- KLASEIS ---------------- #
+
 # KLASI TOKEN
 class Token:
     def __init__(self, recognized_string, family, line_number):
@@ -60,6 +63,7 @@ class Token:
 
 # KLASI LEKTIKOU ANALYTI
 class Lex:
+    # CONSTRUCTOR
     def __init__(self, file_name):
         self.file_name = file_name
         self.current_char = None
@@ -72,11 +76,17 @@ class Lex:
         except FileNotFoundError:
             print(f"Error: File '{file_name}' not found.")
             sys.exit(1)
+    
+    # DESTRUCTOR
+    def __del__(self):
+        print("\nFile flushed & closed... Cleaning up... Done!")
 
+    # EPOMENH LEKSI
     def next_char(self):
         self.current_char = self.file.read(1)
         return self.current_char
     
+    # EPOMENH GRAMMI
     def next_line(self):
         self.current_line += 1
         return self.current_line
@@ -84,7 +94,7 @@ class Lex:
     # PROSPERNAEI KENOUS XARAKTIRES
     def skip_whitespace(self):
         while self.current_char in WHITESPACES:
-            if self.current_char == '\n':
+            if self.current_char == '\n': # AN EXW ALLAGH GRAMMHS ANANEWNW TO PEDIO
                 self.next_line()
             self.next_char()
 
@@ -96,7 +106,7 @@ class Lex:
         if not self.current_char:  # FTASAME SE EOF
             return Token("", TokenFamily.EOF, self.current_line)
 
-        # identifiers kai keywords
+        # IDENTIFIERS KAI KEYWORDS
         if self.current_char.isalpha() or self.current_char == '_':
             word = self.current_char
             self.next_char()
@@ -108,7 +118,7 @@ class Lex:
             token_type = TokenFamily.KEYWORD if word in KEYWORDS else TokenFamily.IDENTIFIER
             return Token(word, token_type, self.current_line)
 
-        # akeraioi
+        # AKERAIOI
         if self.current_char.isdigit():
             word = self.current_char
             self.next_char()
@@ -119,7 +129,7 @@ class Lex:
                     break
             return Token(word, TokenFamily.NUMBER, self.current_line)
 
-        # relOperators: <, >, <=, =, >=, <>
+        # RELATIONAL OPS: <, >, <=, =, >=, <>
         if self.current_char in {'<', '>', '='}:
             word = self.current_char
             line = self.current_line
@@ -130,7 +140,7 @@ class Lex:
                 self.next_char()
             return Token(word, TokenFamily.RELATIONAL_OPERATOR, line)
 
-        # assignment
+        # ANATHESI
         if self.current_char == ':':
             self.next_char()
             if self.current_char == '=':
@@ -138,19 +148,19 @@ class Lex:
                 return Token(":=", TokenFamily.ASSIGNMENT, self.current_line)
             return Token(":", TokenFamily.ERROR, self.current_line)  # Invalid ':'
        
-        # perasma me anafora
+        # PERASMA ME ANAFORA
         if self.current_char == '%':
             self.next_char()
             return Token("%", TokenFamily.PASSBYREFERENCE, self.current_line)
             
-        # arithmitikes prakseis kai sumbola
+        # ARITHMITIKA OPS KAI SYMVOLA
         if self.current_char in OPS_AND_SYMBOLS:
             word = self.current_char
             token_type = OPS_AND_SYMBOLS.get(self.current_char)
             self.next_char()
             return Token(word, token_type, self.current_line)
 
-        # sxolia
+        # SXOLIA
         if self.current_char == '{':
             while self.current_char and self.current_char != '}':
                 if self.current_char == "\n": # se periptwsi pou to sxolio einai pollaples grammes prepei na allazei grammi
@@ -164,6 +174,7 @@ class Lex:
         self.next_char()
         return Token(error_char, TokenFamily.ERROR, self.current_line)
 
+    # SYNARTHSH POU KANEI TIN ANALYSH
     def analyze(self):
         tokens = []
 
@@ -176,8 +187,8 @@ class Lex:
             
             tokens.append(token) # DEN THELOUME TO EOF
             print(token)
-        
-        self.file.close()  
+
+        self.file.close()
         return tokens
 
 
@@ -189,4 +200,7 @@ if __name__ == "__main__":
 
     file_name = sys.argv[1]
     lexer = Lex(file_name)
-    lexer.analyze()
+    # apothikevoume ta tokens gia na ta perasoume meta ston syntax analyzer
+    # o opoios tha kanei tin syntaktiki analysh
+    tokens = lexer.analyze()
+    del lexer # kaloume ton destructor
