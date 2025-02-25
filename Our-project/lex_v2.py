@@ -50,6 +50,10 @@ WHITESPACES = {' ', '\t', '\r', '\n'}
 # ANWTATOS ARITHMOS XARAKTIRWN LEKSIS
 MAX_WORD_SIZE = 30
 
+# ERRORS
+INVALID_TOKEN_ERROR = 'InvalidTokenError'
+INVALID_ASSIGNMENT_ERROR = 'InvalidAssignmentError'
+
 # ---------------- KLASEIS ---------------- #
 
 # KLASI TOKEN
@@ -64,7 +68,7 @@ class Token:
 
 # KLASI LEKTIKOU ANALYTI
 class Lex:
-    # CONSTRUCTOR
+    # CONSTRUCTOR METHODOS
     def __init__(self, file_name):
         self.file_name = file_name
         self.current_char = None
@@ -78,9 +82,17 @@ class Lex:
             print(f"Error: File '{file_name}' not found.")
             sys.exit(1)
     
-    # DESTRUCTOR
+    # DESTRUCTOR METHODOS
     def __del__(self):
         print("\nFile flushed & closed... Cleaning up... Done!")
+    
+    # LEXER ERROR METHODOS - DEN SKAEI TO PROGRAMMA
+    def throwLexError(self, errorType, line, invalid_token=''):
+        match errorType:
+            case 'InvalidTokenError':
+                print(f"### Lexer error at line '{line}' => Invalid token '{invalid_token}'. ###")
+            case 'InvalidAssignmentError':
+                print(f"### Lexer error at line '{line}' => Bad use of ':' operator. Typically only '=' can follow. ###")
 
     # EPOMENH LEKSI
     def next_char(self):
@@ -147,6 +159,7 @@ class Lex:
             if self.current_char == '=':
                 self.next_char()
                 return Token(":=", TokenFamily.ASSIGNMENT, self.current_line)
+            self.throwLexError(INVALID_ASSIGNMENT_ERROR, self.current_line)
             return Token(":", TokenFamily.ERROR, self.current_line)  # Invalid ':'
        
         # PERASMA ME ANAFORA
@@ -172,6 +185,7 @@ class Lex:
 
         # mi dektoi xaraktires
         error_char = self.current_char
+        self.throwLexError(INVALID_TOKEN_ERROR, self.current_line, error_char)
         self.next_char()
         return Token(error_char, TokenFamily.ERROR, self.current_line)
 
