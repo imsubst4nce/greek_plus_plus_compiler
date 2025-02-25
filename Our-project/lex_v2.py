@@ -26,14 +26,14 @@ KEYWORDS = {
     "διαπροσωπεία", "είσοδος", "έξοδος", "ή", "και", "όχι"
 }
 
-ops_and_symbols = {
+OPS_AND_SYMBOLS = {
     '+': TokenType.OPERATOR, '-': TokenType.OPERATOR, '*': TokenType.OPERATOR, '/': TokenType.OPERATOR,
     ';': TokenType.DELIMITER, ',': TokenType.DELIMITER,
     '(': TokenType.GROUP_SYMBOL, ')': TokenType.GROUP_SYMBOL,
     '[': TokenType.GROUP_SYMBOL, ']': TokenType.GROUP_SYMBOL,
 }
 
-whitespaces = {' ', '\t', '\r', '\n'}
+WHITESPACES = {' ', '\t', '\r', '\n'}
 
 # KLASI TOKEN
 class Token:
@@ -107,7 +107,7 @@ class Lex:
             word = self.current_char
             line = self.current_line
             next_word = self.next_char() # epomeni leksi
-            
+
             if (next_word == ' '):
                 self.next_char()
                 return Token(word, TokenType.RELATIONAL_OPERATOR, line)
