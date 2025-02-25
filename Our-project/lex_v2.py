@@ -35,6 +35,8 @@ OPS_AND_SYMBOLS = {
 
 WHITESPACES = {' ', '\t', '\r', '\n'}
 
+MAX_WORD_SIZE = 30
+
 # KLASI TOKEN
 class Token:
     def __init__(self, recognized_string, family, line_number):
@@ -70,7 +72,7 @@ class Lex:
     
     # PROSPERNAEI KENOUS XARAKTIRES
     def skip_whitespace(self):
-        while self.current_char in whitespaces:
+        while self.current_char in WHITESPACES:
             if self.current_char == '\n':
                 self.next_line()
             self.next_char()
@@ -90,6 +92,8 @@ class Lex:
             while self.current_char and (self.current_char.isalnum() or self.current_char == '_'):
                 word += self.current_char
                 self.next_char()
+                if(len(word) >= MAX_WORD_SIZE):
+                    break
             token_type = TokenType.KEYWORD if word in KEYWORDS else TokenType.IDENTIFIER
             return Token(word, token_type, self.current_line)
 
@@ -100,6 +104,8 @@ class Lex:
             while self.current_char and self.current_char.isdigit():
                 word += self.current_char
                 self.next_char()
+                if(len(word) >= MAX_WORD_SIZE):
+                    break
             return Token(word, TokenType.NUMBER, self.current_line)
 
         # relOperators: <, >, <=, =, >=, <>
@@ -133,9 +139,9 @@ class Lex:
             return Token("%", TokenType.PASSBYREFERENCE, self.current_line)
             
         # arithmitikes prakseis kai sumbola
-        if self.current_char in ops_and_symbols:
+        if self.current_char in OPS_AND_SYMBOLS:
             word = self.current_char
-            token_type = ops_and_symbols.get(self.current_char)
+            token_type = OPS_AND_SYMBOLS.get(self.current_char)
             self.next_char()
             return Token(word, token_type, self.current_line)
 
