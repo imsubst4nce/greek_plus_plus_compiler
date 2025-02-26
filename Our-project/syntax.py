@@ -48,7 +48,33 @@ class Syntax:
         self.next_token()
         if self.current_token.recognized_string != "τέλος_προγράμματος":
             self.error("τέλος_προγράμματος")
+    
+    def declarations(self):
+        self.next_token()
+        while self.current_token.recognized_string == "δήλωση":
+            self.varlist()
+            self.next_token()
+            
+    def varlist(self):
+        self.next_token()
+        if self.current_token.family != TokenFamily.IDENTIFIER:
+            self.error_type(TokenFamily.IDENTIFIER)
+        self.next_token()
+        while self.current_token.recognized_string == ",":
+            self.next_token()
+            if self.current_token.family != TokenFamily.IDENTIFIER:
+                self.error_type(TokenFamily.IDENTIFIER)
         
+    def subprograms(self):
+        self.next_token()
+        while self.current_token.family == TokenFamily.KEYWORD:
+            if self.current_token.recognized_string == "συνάρτηση":
+                self.func()
+            elif self.current_token.recognized_string == "διαδικασία":
+                self.proc()
+            else:
+                self.error("συνάρτηση or διαδικασία")
+            
     
             
 
