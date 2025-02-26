@@ -13,7 +13,7 @@ class Syntax:
         if self.token_index < len(self.tokens):
             self.current_token = self.tokens[self.token_index]
             return self.current_token
-        return None
+        
     
     def error(self, expected):
         print(f"Syntax Error: Expected {expected}, but got '{self.current_token.recognized_string}' at line {self.current_token.line_number}")
@@ -74,9 +74,92 @@ class Syntax:
                 self.proc()
             else:
                 self.error("συνάρτηση or διαδικασία")
+
+    def func(self):
+        self.next_token()
+        if self.current_token.recognized_string != "συνάρτηση":
+            self.error("συνάρτηση")
+        self.next_token()
+        if self.current_token.family != TokenFamily.IDENTIFIER:
+            self.error_type(TokenFamily.IDENTIFIER)
+        self.next_token()
+        if self.current_token.recognized_string != "(":
+            self.error("(")
+        self.next_token()
+        self.formalparlist()
+        self.next_token()
+        if self.current_token.recognized_string != ")":
+            self.error(")")
+        self.next_token()
+        self.funcblock()
+
+    def proc(self):
+
+        self.next_token()
+        if self.current_token.recognized_string != "διαδικασία":
+            self.error("διαδικασία")
+        self.next_token()
+        if self.current_token.family != TokenFamily.IDENTIFIER:
+            self.error_type(TokenFamily.IDENTIFIER)
+        self.next_token()
+        if self.current_token.recognized_string != "(":
+            self.error("(")
+        self.next_token()
+        self.formalparlist()
+        self.next_token()
+        if self.current_token.recognized_string != ")":
+            self.error(")")
+        self.next_token()
+        self.procblock()
             
+    def formalparlist(self):
+        if self.tokens[self.token_index+1].family == TokenFamily.IDENTIFIER:
+            self.varlist()
+        
+    def funcblock(self):
+        self.next_token()
+        if self.current_token.recognized_string != "διαπροσωπεία":
+            self.error("διαπροσωπεία")
+        self.funcinput()
+        self.funcoutput()
+        self.declarations()
+        self.subprograms()
+        self.next_token()
+        if self.current_token.recognized_string != "αρχή_συνάρτησης":
+            self.error("αρχή_συνάρτησης")
+        self.sequence()
+        self.next_token()
+        if self.current_token.recognized_string != "τέλος_συνάρτησης":
+            self.error("τέλος_συνάρτησης")
     
-            
+    def procblock(self):
+        self.next_token()
+        if self.current_token.recognized_string != "διαπροσωπεία":
+            self.error("διαπροσωπεία")
+        self.funcinput()
+        self.funcoutput()
+        self.declarations()
+        self.subprograms()
+        self.next_token()
+        if self.current_token.recognized_string != "αρχή_διαδικασίας":
+            self.error("αρχή_διαδικασίας")
+        self.sequence()
+        self.next_token()
+        if self.current_token.recognized_string != "τέλος_διαδικασίας":
+            self.error("τέλος_διαδικασίας")
+    
+    def funcinput(self):
+        if self.tokens[self.token_index+1].recognized_string == "είσοδος":
+            self.next_token()
+            self.varlist()
+
+    def funcoutput(self):
+        if self.tokens[self.token_index+1].recognized_string == "έξοδος":
+            self.next_token()
+            self.varlist()
+        
+    
+
 
 
 # Main function
