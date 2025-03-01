@@ -74,9 +74,13 @@ class Lex:
         self.current_char = None
         self.current_line = 1
 
+        print("-- Lexical Analyzer --")
+
         # ANOIGMA ARXEIOU
         try:
+            print(f"Opening file '{file_name}'...")
             self.file = open(file_name, 'r', encoding='utf-8')
+            print(f"Beginning lectical analysis...\n")
             self.next_char() 
         except FileNotFoundError:
             print(f"Error: File '{file_name}' not found.")
