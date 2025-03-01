@@ -1,3 +1,4 @@
+# ONE WAY LEXER TO SYNTAX ANALYZER #
 from lex_v2 import Lex, TokenFamily
 import sys
 
@@ -23,7 +24,7 @@ class Syntax:
         print(f"Syntax Error: Expected type '{expected.name}', but got type '{self.current_token.family.name}' at line {self.current_token.line_number}")
         sys.exit(1)
 
-    def analyse(self):
+    def analyze(self):
         self.program()
 
 
@@ -173,6 +174,6 @@ if __name__ == "__main__":
     tokens = lexer.analyze()
 
     syntaxer= Syntax(tokens)
-    syntaxer.analyse()
+    syntaxer.analyze()
     del lexer # kaloume ton destructor
     del syntaxer 
