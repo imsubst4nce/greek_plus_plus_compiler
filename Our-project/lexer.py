@@ -223,4 +223,6 @@ if __name__ == "__main__":
     # apothikevoume ta tokens gia na ta perasoume meta ston syntax analyzer
     # o opoios tha kanei tin syntaktiki analysh
     tokens = lexer.analyze()
+    for i in tokens:
+        print('token:' + i.recognized_string)
     del lexer # kaloume ton destructor
