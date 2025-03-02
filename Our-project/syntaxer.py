@@ -16,117 +16,118 @@ from lexer import Lex, TokenFamily
 import sys
 
 class Syntax:
+    # constructor
     def __init__(self, tokens):
         self.tokens = tokens
         self.token_index = 0
         self.current_token = self.tokens[self.token_index]
 
+    # destructor
     def __del__(self):
         print("\nLectical and syntactical analysis finished successfully!")
-        
-
-    def next_token(self):
+    
+    # methodos pou epistrefei tokens
+    def get_token(self):
         self.token_index += 1
         if self.token_index < len(self.tokens):
             self.current_token = self.tokens[self.token_index]
             return self.current_token
-        
     
-    def error(self, expected):
+    def throwError(self, expected):
         print(f"Syntax Error: Expected {expected}, but got '{self.current_token.recognized_string}' at line {self.current_token.line_number}")
         sys.exit(1)
 
-    def error_type(self, expected):
+    def throwTypeError(self, expected):
         print(f"Syntax Error: Expected type '{expected.name}', but got type '{self.current_token.family.name}' at line {self.current_token.line_number}")
         sys.exit(1)
 
+    # methodos analysis pou ksekinaei tin syntaktiki analysi me ti
+    # methodo anadromikis katavasis
     def analyze(self):
         self.program()
 
-
+    # private methodoi grammatikis glwssas
     def program(self):
         if self.current_token.recognized_string != "πρόγραμμα":
-            self.error("πρόγραμμα")
+            self.throwError("πρόγραμμα")
 
-        self.next_token()
+        self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
-            self.error_type(TokenFamily.IDENTIFIER)
+            self.throwTypeError(TokenFamily.IDENTIFIER)
         self.programblock()
-
     
     def programblock(self):
         self.declarations()
         self.subprograms()
-        self.next_token()
+        self.get_token()
         if self.current_token.recognized_string != "αρχή_προγράμματος":
-            self.error("αρχή_προγράμματος")
-        self.next_token()
+            self.throwError("αρχή_προγράμματος")
+        self.get_token()
         self.sequence()
-        self.next_token()
+        self.get_token()
         if self.current_token.recognized_string != "τέλος_προγράμματος":
-            self.error("τέλος_προγράμματος")
+            self.throwError("τέλος_προγράμματος")
     
     def declarations(self):
-        self.next_token()
+        self.get_token()
         while self.current_token.recognized_string == "δήλωση":
             self.varlist()
-            self.next_token()
+            self.get_token()
             
     def varlist(self):
-        self.next_token()
+        self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
-            self.error_type(TokenFamily.IDENTIFIER)
-        self.next_token()
+            self.throwTypeError(TokenFamily.IDENTIFIER)
+        self.get_token()
         while self.current_token.recognized_string == ",":
-            self.next_token()
+            self.get_token()
             if self.current_token.family != TokenFamily.IDENTIFIER:
-                self.error_type(TokenFamily.IDENTIFIER)
+                self.throwTypeError(TokenFamily.IDENTIFIER)
         
     def subprograms(self):
-        self.next_token()
+        self.get_token()
         while self.current_token.family == TokenFamily.KEYWORD:
             if self.current_token.recognized_string == "συνάρτηση":
                 self.func()
             elif self.current_token.recognized_string == "διαδικασία":
                 self.proc()
             else:
-                self.error("συνάρτηση or διαδικασία")
+                self.throwError("συνάρτηση or διαδικασία")
 
     def func(self):
-        self.next_token()
+        self.get_token()
         if self.current_token.recognized_string != "συνάρτηση":
-            self.error("συνάρτηση")
-        self.next_token()
+            self.throwError("συνάρτηση")
+        self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
-            self.error_type(TokenFamily.IDENTIFIER)
-        self.next_token()
+            self.throwTypeError(TokenFamily.IDENTIFIER)
+        self.get_token()
         if self.current_token.recognized_string != "(":
-            self.error("(")
-        self.next_token()
+            self.throwError("(")
+        self.get_token()
         self.formalparlist()
-        self.next_token()
+        self.get_token()
         if self.current_token.recognized_string != ")":
-            self.error(")")
-        self.next_token()
+            self.throwError(")")
+        self.get_token()
         self.funcblock()
 
     def proc(self):
-
-        self.next_token()
+        self.get_token()
         if self.current_token.recognized_string != "διαδικασία":
-            self.error("διαδικασία")
-        self.next_token()
+            self.throwError("διαδικασία")
+        self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
-            self.error_type(TokenFamily.IDENTIFIER)
-        self.next_token()
+            self.throwTypeError(TokenFamily.IDENTIFIER)
+        self.get_token()
         if self.current_token.recognized_string != "(":
-            self.error("(")
-        self.next_token()
+            self.throwError("(")
+        self.get_token()
         self.formalparlist()
-        self.next_token()
+        self.get_token()
         if self.current_token.recognized_string != ")":
-            self.error(")")
-        self.next_token()
+            self.throwError(")")
+        self.get_token()
         self.procblock()
             
     def formalparlist(self):
@@ -134,45 +135,45 @@ class Syntax:
             self.varlist()
         
     def funcblock(self):
-        self.next_token()
+        self.get_token()
         if self.current_token.recognized_string != "διαπροσωπεία":
-            self.error("διαπροσωπεία")
+            self.throwError("διαπροσωπεία")
         self.funcinput()
         self.funcoutput()
         self.declarations()
         self.subprograms()
-        self.next_token()
+        self.get_token()
         if self.current_token.recognized_string != "αρχή_συνάρτησης":
-            self.error("αρχή_συνάρτησης")
+            self.throwError("αρχή_συνάρτησης")
         self.sequence()
-        self.next_token()
+        self.get_token()
         if self.current_token.recognized_string != "τέλος_συνάρτησης":
-            self.error("τέλος_συνάρτησης")
+            self.throwError("τέλος_συνάρτησης")
     
     def procblock(self):
-        self.next_token()
+        self.get_token()
         if self.current_token.recognized_string != "διαπροσωπεία":
-            self.error("διαπροσωπεία")
+            self.throwError("διαπροσωπεία")
         self.funcinput()
         self.funcoutput()
         self.declarations()
         self.subprograms()
-        self.next_token()
+        self.get_token()
         if self.current_token.recognized_string != "αρχή_διαδικασίας":
-            self.error("αρχή_διαδικασίας")
+            self.throwError("αρχή_διαδικασίας")
         self.sequence()
-        self.next_token()
+        self.get_token()
         if self.current_token.recognized_string != "τέλος_διαδικασίας":
-            self.error("τέλος_διαδικασίας")
+            self.throwError("τέλος_διαδικασίας")
     
     def funcinput(self):
         if self.tokens[self.token_index+1].recognized_string == "είσοδος":
-            self.next_token()
+            self.get_token()
             self.varlist()
 
     def funcoutput(self):
         if self.tokens[self.token_index+1].recognized_string == "έξοδος":
-            self.next_token()
+            self.get_token()
             self.varlist()
 
 # Main
@@ -182,7 +183,7 @@ if __name__ == "__main__":
         print("Exiting...")
         sys.exit(1)
 
-    file_name = sys.argv[1] # invoke file name
+    file_name = sys.argv[1]
     
     # Kataskevi antikeimenou tis klasis lexer kai klisi 
     # tis methodou lektikis analysis gia eksagwgi twn tokens
