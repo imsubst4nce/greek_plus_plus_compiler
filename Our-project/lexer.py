@@ -74,7 +74,7 @@ class Lex:
         self.current_char = None
         self.current_line = 1
 
-        print("-- Lexical Analyzer --")
+        print("-- Lex Analyzer --")
 
         # ANOIGMA ARXEIOU
         try:
@@ -88,7 +88,7 @@ class Lex:
     
     # DESTRUCTOR METHODOS
     def __del__(self):
-        print("\nFile flushed & closed... Cleaning up... Done!")
+        print("\n-- Lex Analyzer finished --\n")
     
     # LEXER ERROR METHODOS - DEN SKAEI TO PROGRAMMA
     def throwLexError(self, errorType, line, invalid_token=''):

@@ -22,9 +22,12 @@ class Syntax:
         self.token_index = 0
         self.current_token = self.tokens[self.token_index]
 
+        print("-- Syntax Analyzer --")
+        print("Beginning syntactical analysis...\n")
+
     # destructor
     def __del__(self):
-        print("\nLectical and syntactical analysis finished successfully!")
+        print("\n-- Syntax Analyzer finished --")
     
     # methodos pou epistrefei tokens
     def get_token(self):
@@ -189,12 +192,10 @@ if __name__ == "__main__":
     # tis methodou lektikis analysis gia eksagwgi twn tokens
     lexer = Lex(file_name)
     tokens = lexer.analyze()
+    del lexer
 
     # Kataskevi antikeimenou tis klasis syntaxer kai
     # klisi tis methodou syntaktikis analysis
     syntaxer = Syntax(tokens)
     syntaxer.analyze()
-    
-    # klisi twn destructors
-    del lexer
     del syntaxer
