@@ -248,8 +248,8 @@ class Syntax:
         self.get_token()
         self.condition()
         self.get_token()
-        if self.current_token.recognized_string != 'επανέλαβε':
-            self.throwError('επανέλαβε')
+        if self.current_token.recognized_string != 'επανάλαβε':
+            self.throwError('επανάλαβε')
         self.sequence()
         self.get_token()
         if self.current_token.recognized_string != 'όσο_τέλος':
@@ -263,7 +263,27 @@ class Syntax:
             self.throwError('μέχρι')
         self.condition()
     
-    # def for_stat(self):
+    def for_stat(self):
+        self.get_token()
+        self.get_token()
+        if self.current_token.family != TokenFamily.IDENTIFIER:
+            self.throwTypeError(TokenFamily.IDENTIFIER)
+        self.get_token()
+        if self.current_token.family != TokenFamily.ASSIGNMENT:
+            self.throwTypeError(TokenFamily.ASSIGNMENT)
+        self.expression()
+        self.get_token()
+        if self.current_token.recognized_string != 'έως':
+            self.throwError('έως')
+        self.expression()
+        self.step()
+        self.get_token()
+        if self.current_token.recognized_string != 'επανάλαβε':
+            self.throwError('επανάλαβε')
+        self.sequence()
+        self.get_token()
+        if self.current_token.recognized_string != 'για_τέλος':
+            self.throwError('για_τέλος')
     
     def step(self):
         if self.tokens[self.token_index+1].recognized_string == 'με_βήμα':
@@ -306,16 +326,57 @@ class Syntax:
     
     # def actualparlist(self):
     # def actualparitem(self):
-    # def condition(self):
-    # def boolterm(self):
+
+    def condition(self):
+        self.boolterm()
+        while self.current_token.recognized_string == "ή":
+            self.boolterm()
+    
+    def boolterm(self):
+        self.boolfactor()
+        while self.current_token.recognized_string == "και":
+            self.boolfactor()
+
     # def boolfactor(self):
-    # def expression(self):
-    # def term(self):
+        # self.get_token()
+        
+    def expression(self):
+        self.optional_sign()
+        self.term()
+        while self.current_token.recognized_string == '+' or self.current_token.recognized_string == '-':
+            self.term()
+
+    def term(self):
+        self.factor()
+        while self.current_token.recognized_string == '*' or self.current_token.recognized_string == '/':
+            self.factor()
+    
     # def factor(self):
-    # def relational_oper(self):
-    # def add_oper(self):
-    # def mul_oper(self):
-    # def optional_sign(self):
+    #     self.get_token()
+    #     if self.current_token.family == TokenFamily.NUMBER:
+
+    def relational_oper(self):
+        relational_operators = ['=', '<=', '>=', '<>', '<', '>']
+        self.get_token()
+        if self.current_token.recognized_string not in relational_operators:
+            self.throwTypeError(TokenFamily.RELATIONAL_OPERATOR)
+            
+    def add_oper(self):
+        add_operators = ['+', '-']
+        self.get_token()
+        if self.current_token.recognized_string not in add_operators:
+            self.throwError('ADD_OPERATOR')
+        
+    def mul_oper(self):
+        mul_operators = ['*', '/']
+        self.get_token()
+        if self.current_token.recognized_string not in mul_operators:
+            self.throwError('MUL_OPERATOR')
+    
+    def optional_sign(self):
+        next_token = self.tokens[self.token_index+1].recognized_string
+        if next_token == '+' or next_token == '-':
+            self.add_oper()
 
 # Main
 if __name__ == "__main__":
