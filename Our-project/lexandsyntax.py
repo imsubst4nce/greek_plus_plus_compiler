@@ -241,7 +241,7 @@ class Syntax:
             return self.current_token
         
     def throwInvalidError(self):
-        print(f"Syntax Error: Got invalid phrase.")
+        print(f"Syntax Error: Got invalid phrase '{self.current_token.recognized_string}' at line {self.current_token.line_number}")
         sys.exit(1)
     
     def throwError(self, expected):
@@ -283,20 +283,23 @@ class Syntax:
             self.throwError("τέλος_προγράμματος")
     
     def declarations(self):
-        self.get_token()
-        while self.current_token.recognized_string == "δήλωση":
-            self.varlist()
+     
+        while self.tokens[self.token_index+1].recognized_string =="δήλωση":
             self.get_token()
+            self.varlist() 
+        self.get_token()
+            
             
     def varlist(self):
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
             self.throwTypeError(TokenFamily.IDENTIFIER)
-        self.get_token()
-        while self.current_token.recognized_string == ",":
+        
+        while self.tokens[self.token_index+1].recognized_string ==",":
+            self.get_token()
             self.get_token()
             if self.current_token.family != TokenFamily.IDENTIFIER:
-                self.throwTypeError(TokenFamily.IDENTIFIER)
+                self.throwTypeError(TokenFamily.IDENTIFIER)  
         
     def subprograms(self):
        
@@ -310,21 +313,20 @@ class Syntax:
         
 
     def func(self):
-        self.get_token()
-        if self.current_token.recognized_string != "συνάρτηση":
-            self.throwError("συνάρτηση")
+        
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
             self.throwTypeError(TokenFamily.IDENTIFIER)
         self.get_token()
         if self.current_token.recognized_string != "(":
             self.throwError("(")
-        self.get_token()
+            
         self.formalparlist()
-        self.get_token()
+        
+        
         if self.current_token.recognized_string != ")":
             self.throwError(")")
-        self.get_token()
+        
         self.funcblock()
 
     def proc(self):
@@ -347,8 +349,10 @@ class Syntax:
             
     def formalparlist(self):
         if self.tokens[self.token_index+1].family == TokenFamily.IDENTIFIER:
-            self.get_token() # twra
             self.varlist()
+            self.get_token()
+        else: self.get_token()
+ 
         
     def funcblock(self):
         self.get_token()
@@ -358,7 +362,7 @@ class Syntax:
         self.funcoutput()
         self.declarations()
         self.subprograms()
-        self.get_token()
+        
         if self.current_token.recognized_string != "αρχή_συνάρτησης":
             self.throwError("αρχή_συνάρτησης")
         self.sequence()
