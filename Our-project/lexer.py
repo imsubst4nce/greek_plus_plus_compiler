@@ -144,6 +144,15 @@ class Lex:
                 self.next_char()
                 if(len(word) >= MAX_WORD_SIZE):
                     break
+            # Check if the next character is not a digit or whitespace
+            if self.current_char and (self.current_char.isalpha() or self.current_char == '_'):
+                word += self.current_char
+                self.next_char()
+                while self.current_char and (self.current_char.isalnum() or self.current_char == '_'):
+                    word += self.current_char
+                    self.next_char()
+                self.throwLexError(INVALID_TOKEN_ERROR, self.current_line, word)
+                return Token(word, TokenFamily.ERROR, self.current_line)
             return Token(word, TokenFamily.NUMBER, self.current_line)
 
         # RELATIONAL OPS: <, >, <=, =, >=, <>
