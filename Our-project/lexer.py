@@ -29,7 +29,7 @@ class TokenFamily(Enum):
 # DESMEYMENES LEKSEIS
 KEYWORDS = {
     "πρόγραμμα", "δήλωση", "εάν", "τότε", "αλλιώς", "εάν_τέλος",
-    "επανάλαβε", "μέχρι", "όσο", "όσο_τέλος", "για", "εώς", "με_βήμα",
+    "επανάλαβε", "μέχρι", "όσο", "όσο_τέλος", "για", "έως", "με_βήμα",
     "για_τέλος", "διάβασε", "γράψε", "συνάρτηση", "διαδικασία", "διαπροσωπεία",
     "είσοδος", "έξοδος", "αρχή_συνάρτησης", "τέλος_συνάρτησης", "αρχή_διαδικασίας",
     "τέλος_διαδικασίας", "αρχή_προγράμματος", "τέλος_προγράμματος", "ή", "και", "όχι",
@@ -232,6 +232,7 @@ if __name__ == "__main__":
     # apothikevoume ta tokens gia na ta perasoume meta ston syntax analyzer
     # o opoios tha kanei tin syntaktiki analysh
     tokens = lexer.analyze()
-    for i in tokens:
-        print('token:' + i.recognized_string)
+   # for i in tokens:
+   #    print('token:' + i.recognized_string)
+
     del lexer # kaloume ton destructor

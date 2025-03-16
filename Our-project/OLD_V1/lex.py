@@ -153,7 +153,7 @@ class Lex:
                     input_cat=1
                 elif self.current_char in DIGITS:
                     input_cat=2
-                    family='number'
+                    
                 elif self.current_char=='+':
                     input_cat=3
                     family='arithmeticOperator'
@@ -328,6 +328,8 @@ class Lex:
                     family='identifier'
             elif state==E2:
                 family='number'
+            elif state==TOK_ERROR:
+                family='ERROR'
             return Token(recognized_string,family,self.current_line)
 
         except FileNotFoundError:

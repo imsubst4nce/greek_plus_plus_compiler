@@ -219,6 +219,7 @@ class Lex:
         return tokens
 
 
+
 class Syntax:
     # constructor
     def __init__(self, tokens):
@@ -255,6 +256,14 @@ class Syntax:
     # methodos analysis pou ksekinaei tin syntaktiki analysi me ti
     # methodo anadromikis katavasis
     def analyze(self):
+        
+        for token in self.tokens:
+            if token.family.name =="ERROR":
+                print(f"Syntax Error: Invalid token '{token.recognized_string}' at line {token.line_number}")
+                sys.exit(1)
+
+
+
         self.program()
 
     # --------------------------------------- #
@@ -265,7 +274,9 @@ class Syntax:
     def program(self):
         if self.current_token.recognized_string != "πρόγραμμα":
             self.throwError("πρόγραμμα")
-        self.get_token()
+
+        self.get_token() #move to next token: <ID> 
+
         if self.current_token.family != TokenFamily.IDENTIFIER:
             self.throwTypeError(TokenFamily.IDENTIFIER)
         self.programblock()
