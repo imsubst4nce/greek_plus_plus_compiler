@@ -23,7 +23,7 @@ class Syntax:
             self.current_token = self.tokens[self.token_index]
 
             #to ebala gia na testarw pio token diabazw 
-            print(self.current_token)
+            #print(self.current_token)
             return self.current_token
         
     def next_token(self):
@@ -66,8 +66,8 @@ class Syntax:
     # 38 private methodoi grammatikis glwssas #
 
     def program(self):
-        print("entered program()")
-        print(self.current_token)
+        #print("entered program()")
+        #print(self.current_token)
         if self.current_token.recognized_string != "πρόγραμμα":
             self.throwError("πρόγραμμα")
         
@@ -78,7 +78,7 @@ class Syntax:
         self.programblock()
         
     def programblock(self):
-        print("entered programblock()")
+        #print("entered programblock()")
 
         self.declarations()
         self.subprograms()
@@ -94,7 +94,7 @@ class Syntax:
             
 
     def declarations(self):
-        print("entered declarations()")
+        #print("entered declarations()")
 
         if self.next_token().recognized_string != "δήλωση":
             return
@@ -103,7 +103,7 @@ class Syntax:
             self.varlist()
 
     def varlist(self):
-        print("entered varlist()")
+        #print("entered varlist()")
 
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
@@ -115,7 +115,7 @@ class Syntax:
        
         
     def subprograms(self):
-        print("entered subprograms()")
+        #print("entered subprograms()")
 
         while self.next_token().recognized_string == "συνάρτηση":
             self.func()
@@ -123,7 +123,7 @@ class Syntax:
             self.proc()
 
     def func(self):
-        print("entered func()")
+        #print("entered func()")
 
         self.get_token()
         if self.current_token.recognized_string != "συνάρτηση":
@@ -147,7 +147,7 @@ class Syntax:
 
 
     def proc(self):
-        print("entered proc()")
+        #print("entered proc()")
 
         self.get_token()
         if self.current_token.recognized_string != "διαδικασία":
@@ -170,14 +170,14 @@ class Syntax:
         self.procblock()
 
     def formalparlist(self):
-        print("entered formalparlist()")
+        #print("entered formalparlist()")
 
         if self.next_token().recognized_string == ")":
             return
         self.varlist()
 
     def funcblock(self):
-        print("entered funcblock()")
+        #print("entered funcblock()")
 
         self.get_token()
         if self.current_token.recognized_string != "διαπροσωπεία":
@@ -201,7 +201,7 @@ class Syntax:
 
         
     def procblock(self):
-        print("entered procblock()")
+        #print("entered procblock()")
 
         self.get_token()
         if self.current_token.recognized_string != "διαπροσωπεία":
@@ -223,7 +223,7 @@ class Syntax:
             self.throwError("τέλος_διαδικασίας")
 
     def funcinput(self):
-        print("entered funcinput()")
+        #print("entered funcinput()")
 
         if self.next_token().recognized_string == "είσοδος":
             self.get_token()
@@ -233,7 +233,7 @@ class Syntax:
     
 
     def funcoutput(self):
-        print("entered funcoutput()")
+        #print("entered funcoutput()")
 
         if self.next_token().recognized_string == "έξοδος":
             self.get_token()
@@ -242,7 +242,7 @@ class Syntax:
             return
 
     def sequence(self):
-        print("entered sequence()")
+        #print("entered sequence()")
 
         self.statement()
         while self.next_token().recognized_string == ';':
@@ -251,7 +251,7 @@ class Syntax:
             self.statement()
 
     def statement(self):
-        print("entered statement()")
+        #print("entered statement()")
 
         if self.next_token().family==TokenFamily.IDENTIFIER:
             self.assignment_stat()
@@ -291,7 +291,7 @@ class Syntax:
 
 
     def assignment_stat(self):
-        print("entered assignment_stat()")
+        #print("entered assignment_stat()")
 
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
@@ -304,7 +304,7 @@ class Syntax:
         self.expression()
 
     def if_stat(self):
-        print("entered if_stat()")
+        #print("entered if_stat()")
 
         self.get_token()
         if self.current_token.recognized_string!="εάν":
@@ -326,14 +326,14 @@ class Syntax:
         ##continue
 
     def elsepart(self):
-        print("entered else_stat()")
+        #print("entered else_stat()")
         if self.next_token().recognized_string=="αλλιώς":
             self.get_token()
             self.sequence()
         else: return
 
     def while_stat(self):
-        print("entered while_stat()")
+        #print("entered while_stat()")
         self.get_token()
         if self.current_token.recognized_string!="όσο":
             self.throwError("όσο")
@@ -350,7 +350,7 @@ class Syntax:
             self.throwError("όσο_τέλος")
 
     def do_stat(self):
-        print("entered do_stat()")
+        #print("entered do_stat()")
 
         self.get_token()
         if self.current_token.recognized_string!="επανάλαβε":
@@ -363,7 +363,7 @@ class Syntax:
         self.condition()
 
     def for_stat(self):
-        print("entered for_stat()")
+        #print("entered for_stat()")
         self.get_token()
         if self.current_token.recognized_string!="για":
             self.throwError("για")
@@ -419,13 +419,13 @@ class Syntax:
         
 
     def idtail(self):
-        print("entered idtail()")
+        #print("entered idtail()")
 
         if self.next_token().recognized_string == "(":
             self.actualpars()
 
     def actualpars(self):
-        print("entered actualpars()")
+        #print("entered actualpars()")
 
         self.get_token()
         if self.current_token.recognized_string!="(":
@@ -437,7 +437,7 @@ class Syntax:
 
 
     def actualparlist(self):
-        print("entered actualparlist()")
+        #print("entered actualparlist()")
 
         if self.next_token().recognized_string==")":
             return
@@ -447,7 +447,7 @@ class Syntax:
             self.actualparitem()
 
     def actualparitem(self):
-        print("entered actualparitem()")
+        #print("entered actualparitem()")
 
         if self.next_token().family==TokenFamily.PASSBYREFERENCE:
             self.get_token()
@@ -460,7 +460,7 @@ class Syntax:
 
 
     def condition(self):
-        print("entered condition()")
+        #print("entered condition()")
 
         self.boolterm()
         while self.next_token().recognized_string=="ή":
@@ -468,7 +468,7 @@ class Syntax:
             self.boolterm()
 
     def boolterm(self):
-        print("entered boolterm()")
+        #print("entered boolterm()")
 
         self.boolfactor()
         while self.next_token().recognized_string=="και":
@@ -476,7 +476,7 @@ class Syntax:
             self.boolfactor()
 
     def boolfactor(self):
-        print("entered boolfactor()")
+        #print("entered boolfactor()")
         if self.next_token().recognized_string == "όχι":
             self.get_token()
 
@@ -506,7 +506,7 @@ class Syntax:
 
 
     def expression(self):
-        print("entered expression()")
+        #print("entered expression()")
 
         self.optional_sign()
         self.term()
@@ -515,7 +515,7 @@ class Syntax:
             self.term()
 
     def term(self):
-        print("entered term()")
+        #print("entered term()")
 
         self.factor()
         while (self.next_token().recognized_string=="*") or (self.next_token().recognized_string=="/"):
@@ -523,7 +523,7 @@ class Syntax:
             self.factor()
 
     def factor(self):
-        print("entered factor()")
+        #print("entered factor()")
 
         self.get_token()
         if self.current_token.family == TokenFamily.NUMBER:
@@ -540,7 +540,7 @@ class Syntax:
             self.throwError("ID or (Expression) or NUMBER")
 
     def relational_oper(self):
-        print("entered relational_oper()")
+        #print("entered relational_oper()")
 
         self.get_token()
         if self.current_token.family!=TokenFamily.RELATIONAL_OPERATOR:
@@ -548,7 +548,7 @@ class Syntax:
 
 
     def add_oper(self):
-        print("entered add_oper()")
+        #print("entered add_oper()")
 
         self.get_token()
         if (self.current_token.recognized_string!="+") and (self.current_token.recognized_string!="-"):
@@ -556,18 +556,18 @@ class Syntax:
             self.throwError("+ or -")
 
     def mul_oper(self):
-        print("entered mul_oper()")
+        #print("entered mul_oper()")
 
         self.get_token()
         if (self.current_token.recognized_string!="*") and (self.current_token.recognized_string!="/"):
             self.throwError("* or /")
 
     def optional_sign(self):
-        print("entered optional_sign()")
+        #print("entered optional_sign()")
 
         if (self.next_token().recognized_string=="+") or (self.next_token().recognized_string=="-"):
             self.add_oper()
-        else: print("no sign")
+        #else: print("no sign")
 
 
         
@@ -580,7 +580,7 @@ class Syntax:
 # Main
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Error: Call should look like 'python syntaxer.py <file_name>'")
+        print("Error: Call should look like 'python syntax.py <file_name>'")
         print("Exiting...")
         sys.exit(1)
 
