@@ -343,10 +343,12 @@ class Syntax:
     def subprograms(self):
         #print("entered subprograms()")
 
-        while self.next_token().recognized_string == "συνάρτηση":
+        if self.next_token().recognized_string == "συνάρτηση":
             self.func()
-        while self.next_token().recognized_string == "διαδικασία":
+            self.subprograms()
+        elif self.next_token().recognized_string == "διαδικασία":
             self.proc()
+            self.subprograms()
 
     def func(self):
         #print("entered func()")
