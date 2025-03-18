@@ -264,16 +264,21 @@ class Syntax:
         return self.current_token
 
     def throwInvalidError(self):
-        print(f"Syntax Error: Got invalid phrase '{self.current_token.recognized_string}' at line {self.current_token.line_number}")
+        print(f"Syntax Error at line {self.current_token.line_number}: Got invalid phrase '{self.current_token.recognized_string}'.")
         sys.exit(1)
     
-    def throwError(self, expected):
-        print(f"Syntax Error: Expected '{expected}', but got '{self.current_token.recognized_string}' at line {self.current_token.line_number}")
+    def error_expected(self, expected):
+        print(f"Syntax Error at line {self.current_token.line_number}: Expected '{expected}', but got '{self.current_token.recognized_string}'.")
         sys.exit(1)
 
     def throwTypeError(self, expected):
-        print(f"Syntax Error: Expected type '{expected.name}', but got type '{self.current_token.family.name}' at line {self.current_token.line_number}")
+        print(f"Syntax Error at line {self.current_token.line_number}: Expected type '{expected.name}', but got type '{self.current_token.family.name}'.")
         sys.exit(1)
+
+    def error_message(self, message):
+        print(f"Syntax Error at line {self.current_token.line_number}: {message}.")
+        sys.exit(1)
+        
 
     # methodos analysis pou ksekinaei tin syntaktiki analysi me ti
     # methodo anadromikis katavasis
@@ -281,11 +286,11 @@ class Syntax:
         
         for token in self.tokens:
             if token.family.name =="ERROR":
-                print(f"Syntax Error: Invalid token '{token.recognized_string}' at line {token.line_number}")
+                print(f"Syntax Error: Lectical analysis found invalid token '{token.recognized_string}' at line {token.line_number}")
                 sys.exit(1)
 
         self.program()
-        print("\n--No errors--")
+        print(f"--No errors--")
 
 
     # --------------------------------------- #
@@ -295,11 +300,11 @@ class Syntax:
         #print("entered program()")
         #print(self.current_token)
         if self.current_token.recognized_string != "πρόγραμμα":
-            self.throwError("πρόγραμμα")
+            self.error_message("Program should start with 'πρόγραμμα'")
         
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
-            self.throwTypeError(TokenFamily.IDENTIFIER)
+            self.error_message("'πρόγραμμα' should be followed by <PROGRAM_NAME> of type <IDENTIFIER>")
 
         self.programblock()
         
@@ -307,15 +312,19 @@ class Syntax:
         #print("entered programblock()")
 
         self.declarations()
+        if (self.next_token().recognized_string!="συνάρτηση") and (self.next_token().recognized_string!="διαδικασία"):
+            self.get_token()
+            self.error_message("No subprograms (functions, processes) were initialised before 'αρχή_προγράμματος'")
+
         self.subprograms()
-        ### continue with arxi programmatos
+        ### continue with arxi programmatos 
         self.get_token()
         if self.current_token.recognized_string!="αρχή_προγράμματος":
-            self.throwError("αρχή_προγράμματος")
+            self.error_message("'αρχή_προγράμματος' not found")
         self.sequence()
         self.get_token()
         if self.current_token.recognized_string!="τέλος_προγράμματος":
-            self.throwError("τέλος_προγράμματος")
+            self.error_expected("τέλος_προγράμματος")
 
             
 
@@ -333,7 +342,7 @@ class Syntax:
 
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
-            self.throwTypeError(TokenFamily.IDENTIFIER)
+            self.error_message("'δήλωση' should be of type: δήλωση <IDENTIFIER>, ... ,<IDENTIFIER>")
         while self.next_token().recognized_string == ',':
             self.get_token()
 
@@ -346,30 +355,34 @@ class Syntax:
         if self.next_token().recognized_string == "συνάρτηση":
             self.func()
             self.subprograms()
+            return
         elif self.next_token().recognized_string == "διαδικασία":
             self.proc()
             self.subprograms()
+            return
+        
+
 
     def func(self):
         #print("entered func()")
 
         self.get_token()
         if self.current_token.recognized_string != "συνάρτηση":
-            self.throwError("συνάρτηση")
+            self.error_expected("συνάρτηση")
 
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
-            self.throwTypeError(TokenFamily.IDENTIFIER)
+            self.error_message("'συνάρτηση' should be followed by <FUNCTION_NAME> of type <IDENTIFIER>")
 
         self.get_token()
         if self.current_token.recognized_string != "(":
-            self.throwError("(")
+            self.error_expected("(")
 
         self.formalparlist()
 
         self.get_token()
         if self.current_token.recognized_string != ")":
-            self.throwError(")")
+            self.error_expected(")")
 
         self.funcblock()
 
@@ -379,21 +392,21 @@ class Syntax:
 
         self.get_token()
         if self.current_token.recognized_string != "διαδικασία":
-            self.throwError("διαδικασία")
+            self.error_expected("διαδικασία")
 
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
-            self.throwTypeError(TokenFamily.IDENTIFIER)
+            self.error_message("'διαδικασία' should be followed by <PROCESS_NAME> of type <IDENTIFIER>")
 
         self.get_token()
         if self.current_token.recognized_string != "(":
-            self.throwError("(")
+            self.error_expected("(")
 
         self.formalparlist()
 
         self.get_token()
         if self.current_token.recognized_string != ")":
-            self.throwError(")")
+            self.error_expected(")")
 
         self.procblock()
 
@@ -409,7 +422,7 @@ class Syntax:
 
         self.get_token()
         if self.current_token.recognized_string != "διαπροσωπεία":
-            self.throwError("διαπροσωπεία")
+            self.error_expected("διαπροσωπεία")
 
         self.funcinput()
         self.funcoutput()
@@ -418,13 +431,13 @@ class Syntax:
 
         self.get_token()
         if self.current_token.recognized_string != "αρχή_συνάρτησης":
-            self.throwError("αρχή_συνάρτησης")
+            self.error_expected("αρχή_συνάρτησης")
 
         self.sequence()
 
         self.get_token()
         if self.current_token.recognized_string != "τέλος_συνάρτησης":
-            self.throwError("τέλος_συνάρτησης")
+            self.error_expected("τέλος_συνάρτησης")
 
 
         
@@ -433,7 +446,7 @@ class Syntax:
 
         self.get_token()
         if self.current_token.recognized_string != "διαπροσωπεία":
-            self.throwError("διαπροσωπεία")
+            self.error_expected("διαπροσωπεία")
 
         self.funcinput()
         self.funcoutput()
@@ -442,13 +455,13 @@ class Syntax:
 
         self.get_token()
         if self.current_token.recognized_string != "αρχή_διαδικασίας":
-            throwError("αρχή_διαδικασίας")
+            error_expected("αρχή_διαδικασίας")
 
         self.sequence()
 
         self.get_token()
         if self.current_token.recognized_string != "τέλος_διαδικασίας":
-            self.throwError("τέλος_διαδικασίας")
+            self.error_expected("τέλος_διαδικασίας")
 
     def funcinput(self):
         #print("entered funcinput()")
@@ -504,14 +517,14 @@ class Syntax:
             return
         elif self.next_token().recognized_string=="εκτέλεσε":
             self.call_stat()
-            return
+            return  
 
-        print("\nERROR: NO VALID STATEMENT.\n")
+        #print("\nERROR: NO VALID STATEMENT.\n")
         self.get_token()
-        self.throwInvalidError()
+        self.error_message("No assignment or <εάν, όσο, επανάλαβε, για, διάβασε, γράψε, εκτέλεσε> found.\nCheck for unnecessary extra ';' at end of block")
 
 
-
+            
         ##fix print error here
         #else:
             #self.get_token()
@@ -527,7 +540,7 @@ class Syntax:
 
         self.get_token()
         if self.current_token.family!= TokenFamily.ASSIGNMENT:
-            self.throwError(":=")
+            self.error_expected(":=")
 
         self.expression()
 
@@ -536,20 +549,20 @@ class Syntax:
 
         self.get_token()
         if self.current_token.recognized_string!="εάν":
-            self.throwError("εάν")
+            self.error_expected("εάν")
 
         self.condition()
 
         self.get_token()
         if self.current_token.recognized_string!="τότε":
-            self.throwError("τότε")
+            self.error_expected("τότε")
 
         self.sequence()
         self.elsepart()
 
         self.get_token()
         if self.current_token.recognized_string!="εάν_τέλος":
-            self.throwError("εάν_τέλος")
+            self.error_expected("εάν_τέλος")
 
         ##continue
 
@@ -564,37 +577,37 @@ class Syntax:
         #print("entered while_stat()")
         self.get_token()
         if self.current_token.recognized_string!="όσο":
-            self.throwError("όσο")
+            self.error_expected("όσο")
         self.condition()
 
         self.get_token()
         if self.current_token.recognized_string!="επανάλαβε":
-            self.throwError("επανάλαβε")
+            self.error_expected("επανάλαβε")
 
         self.sequence()
 
         self.get_token()
         if self.current_token.recognized_string!="όσο_τέλος":
-            self.throwError("όσο_τέλος")
+            self.error_expected("όσο_τέλος")
 
     def do_stat(self):
         #print("entered do_stat()")
 
         self.get_token()
         if self.current_token.recognized_string!="επανάλαβε":
-            self.throwError("επανάλαβε")
+            self.error_expected("επανάλαβε")
 
         self.sequence()
         self.get_token()
         if self.current_token.recognized_string!="μέχρι":
-            self.throwError("μέχρι")
+            self.error_expected("μέχρι")
         self.condition()
 
     def for_stat(self):
         #print("entered for_stat()")
         self.get_token()
         if self.current_token.recognized_string!="για":
-            self.throwError("για")
+            self.error_expected("για")
 
         self.get_token()
         if self.current_token.family!=TokenFamily.IDENTIFIER:
@@ -607,17 +620,17 @@ class Syntax:
         self.expression()
         self.get_token()
         if self.current_token.recognized_string!="έως":
-            self.throwError("έως")
+            self.error_expected("έως")
         self.expression()
 
         self.step()
         self.get_token()
         if self.current_token.recognized_string!="επανάλαβε":
-            self.throwError("επανάλαβε")
+            self.error_expected("επανάλαβε")
         self.sequence()
         self.get_token()
         if self.current_token.recognized_string!="για_τέλος":
-            self.throwError("για_τέλος")
+            self.error_expected("για_τέλος")
 
 
     def step(self):
@@ -634,15 +647,13 @@ class Syntax:
         self.get_token()
         self.get_token()
         if self.current_token.family!=TokenFamily.IDENTIFIER:
-            print("\nError: 'διάβασε' must be followed by IDENTIFIER.\n")
-            self.throwTypeError(TokenFamily.IDENTIFIER)
+            self.error_message("'διάβασε' should be followed by type <IDENTIFIER>'")
 
     def call_stat(self):
         self.get_token()
         self.get_token()
         if self.current_token.family!=TokenFamily.IDENTIFIER:
-            print("\nError: 'εκτέλεσε' must be followed by function(<input>).\n")
-            self.throwTypeError(TokenFamily.IDENTIFIER)
+            self.error_message("'εκτέλεσε' should be followed by type <IDENTIFIER>'")
         self.idtail()
         
 
@@ -657,11 +668,11 @@ class Syntax:
 
         self.get_token()
         if self.current_token.recognized_string!="(":
-            self.throwError("(")
+            self.error_expected("(")
         self.actualparlist()
         self.get_token()
         if self.current_token.recognized_string!=")":
-            self.throwError(")")
+            self.error_expected(")")
 
 
     def actualparlist(self):
@@ -682,7 +693,8 @@ class Syntax:
 
             self.get_token()
             if self.current_token.family!=TokenFamily.IDENTIFIER:
-                self.throwTypeError(TokenFamily.IDENTIFIER)
+                self.error_message("'%' should be followed by type <IDENTIFIER>'")
+
             return
         else: self.expression()
 
@@ -714,22 +726,12 @@ class Syntax:
             self.condition()
             self.get_token() 
             if self.current_token.recognized_string!="]":
-                self.throwError("]")
+                self.error_expected("]")
             return
         
         self.expression()
         self.relational_oper()
         self.expression()        
-        #if (self.next_token().recognized_string != "όχι") and (self.next_token().recognized_string != "["):
-        #    self.expression()
-        #    self.relational_oper()
-        #    self.expression()
-        #    return
-
-        
-
-        
-        
 
 
 
@@ -760,12 +762,12 @@ class Syntax:
             self.expression()
             self.get_token()
             if self.current_token.recognized_string!=")":
-                self.throwError(")")  
+                self.error_expected(")")  
         elif self.current_token.family==TokenFamily.IDENTIFIER:
             #self.get_token()
             self.idtail()
         else:
-            self.throwError("ID or (Expression) or NUMBER")
+            self.error_expected("ID or (Expression) or NUMBER")
 
     def relational_oper(self):
         #print("entered relational_oper()")
@@ -781,14 +783,14 @@ class Syntax:
         self.get_token()
         if (self.current_token.recognized_string!="+") and (self.current_token.recognized_string!="-"):
             #self.get_token()
-            self.throwError("+ or -")
+            self.error_expected("+ or -")
 
     def mul_oper(self):
         #print("entered mul_oper()")
 
         self.get_token()
         if (self.current_token.recognized_string!="*") and (self.current_token.recognized_string!="/"):
-            self.throwError("* or /")
+            self.error_expected("* or /")
 
     def optional_sign(self):
         #print("entered optional_sign()")
