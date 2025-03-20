@@ -94,7 +94,7 @@ class Lex:
     
     # DESTRUCTOR METHODOS
     def __del__(self):
-        print("\n-- Lex Analyzer finished --\n")
+        print("\n-- Lex Analyzer finished --")
     
     # LEXER ERROR METHODOS - DEN SKAEI TO PROGRAMMA
     def throwLexError(self, errorType, line, invalid_token=''):
@@ -236,7 +236,7 @@ class Syntax:
         self.token_index = 0
         self.current_token = self.tokens[self.token_index]
 
-        print("-- Syntax Analyzer --")
+        print("\n-- Syntax Analyzer --")
         print("Beginning syntactical analysis...\n")
 
     # destructor
