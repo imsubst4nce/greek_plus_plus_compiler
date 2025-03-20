@@ -1,19 +1,19 @@
-# ---------------- MYY802 - COMPILERS ---------------- #
-# ------------------- SPRING 2025 -------------------- #
-# ---------SEMESTER PROJECT: GREEK++ COMPILER--------- #
+# ----------------- MYY802 - COMPILERS ----------------- #
+# -------------------- SPRING 2025 --------------------- #
+# --------- SEMESTER PROJECT: GREEK++ COMPILER --------- #
+
 # A.M 5064 KOUTOULIS CHRISTOS
 # A.M 5108 KOUTSONIKOLIS NIKOLAOS
 # PYTHON VERSION: 3.11.7
-
-
 
 import sys
 from enum import Enum, auto
 
 # ---------------- TOKEN DECLARATIONS ---------------- #
+
 # TOKEN FAMILIES 
 class TokenFamily(Enum):
-    NUMBER = 0 # an ta valw ola auto ksekinaei apo 1
+    NUMBER = 0 # an ta valw ola auto() ksekinaei apo 1, giafto to vazw apo 0
     IDENTIFIER = auto()
     KEYWORD = auto()
     OPERATOR = auto()
@@ -39,7 +39,8 @@ KEYWORDS = {
 
 # PRAKSEIS KAI SYMVOLA
 OPS_AND_SYMBOLS = {
-    '+': TokenFamily.OPERATOR, '-': TokenFamily.OPERATOR, '*': TokenFamily.OPERATOR, '/': TokenFamily.OPERATOR,
+    '+': TokenFamily.OPERATOR, '-': TokenFamily.OPERATOR,
+    '*': TokenFamily.OPERATOR, '/': TokenFamily.OPERATOR,
     ';': TokenFamily.DELIMITER, ',': TokenFamily.DELIMITER,
     '(': TokenFamily.GROUP_SYMBOL, ')': TokenFamily.GROUP_SYMBOL,
     '[': TokenFamily.GROUP_SYMBOL, ']': TokenFamily.GROUP_SYMBOL,
@@ -149,7 +150,7 @@ class Lex:
                 self.next_char()
                 if(len(word) >= MAX_WORD_SIZE):
                     break
-            # Check if the next character is not a digit or whitespace
+            # Tsekare an o epomenos xaraktiras einai psifio h whitespace
             if self.current_char and (self.current_char.isalpha() or self.current_char == '_'):
                 word += self.current_char
                 self.next_char()
@@ -178,7 +179,7 @@ class Lex:
                 self.next_char()
                 return Token(":=", TokenFamily.ASSIGNMENT, self.current_line)
             self.throwLexError(INVALID_ASSIGNMENT_ERROR, self.current_line)
-            return Token(":", TokenFamily.ERROR, self.current_line)  # Invalid ':'
+            return Token(":", TokenFamily.ERROR, self.current_line)  # Mh egkyro ':'
        
         # PERASMA ME ANAFORA
         if self.current_char == '%':
@@ -195,19 +196,19 @@ class Lex:
         # SXOLIA
         if self.current_char == '{':
             while self.current_char and self.current_char != '}':
-                if self.current_char == "\n": # se periptwsi pou to sxolio einai pollaples grammes prepei na allazei grammi
+                if self.current_char == "\n": # se periptwsi pou to sxolio einai pollaples grammes prepei na prosmetrountai
                     self.skip_whitespace()
                 self.next_char()
             self.next_char()  
             return self.get_token()
 
-        # mi dektoi xaraktires
+        # MI DEKTOI XARAKTIRES
         error_char = self.current_char
         self.throwLexError(INVALID_TOKEN_ERROR, self.current_line, error_char)
         self.next_char()
         return Token(error_char, TokenFamily.ERROR, self.current_line)
 
-    # SYNARTHSH POU KANEI TIN ANALYSH
+    # SYNARTHSH POU KANEI TIN LEKTIKH ANALYSH
     def analyze(self):
         tokens = []
 
@@ -813,6 +814,7 @@ if __name__ == "__main__":
         print("Error: File must be of .gr type")
         print("Exiting...")
         sys.exit(1)
+    
     file_name = sys.argv[1]
     
     # Kataskevi antikeimenou tis klasis lexer kai klisi 
