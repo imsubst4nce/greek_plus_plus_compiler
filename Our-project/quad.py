@@ -20,7 +20,7 @@ class Quad:
         self.operand2 = operand2
         self.operand3 = operand3
         self.label = None # init quad label is None and will be replaced during backpatching
-        self.quadlist.append([operation, operand1, operand2, operand3, self.label])
+        # self.quadlist.append([operation, operand1, operand2, operand3, self.label])
     
     # Returns next quad's label
     # Needs to be fixed!!!
