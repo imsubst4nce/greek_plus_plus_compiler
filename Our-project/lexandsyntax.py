@@ -313,11 +313,11 @@ class Syntax:
         #print("entered programblock()")
 
         self.declarations()
-        if (self.next_token().recognized_string!="συνάρτηση") and (self.next_token().recognized_string!="διαδικασία"):
-            self.get_token()
-            self.error_message("No subprograms (functions, processes) were initialised before 'αρχή_προγράμματος'")
+        if (self.next_token().recognized_string=="συνάρτηση") or (self.next_token().recognized_string=="διαδικασία"):
+            self.subprograms()
+            
 
-        self.subprograms()
+        
         ### continue with arxi programmatos 
         self.get_token()
         if self.current_token.recognized_string!="αρχή_προγράμματος":
