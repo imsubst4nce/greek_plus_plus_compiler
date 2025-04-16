@@ -456,7 +456,7 @@ class Syntax:
 
         self.get_token()
         if self.current_token.recognized_string != "αρχή_διαδικασίας":
-            error_expected("αρχή_διαδικασίας")
+            self.error_expected("αρχή_διαδικασίας")
 
         self.sequence()
 
