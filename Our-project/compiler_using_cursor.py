@@ -7,6 +7,7 @@
 # PYTHON VERSION: 3.11.7
 
 import sys
+import os
 from enum import Enum, auto
 
 # ---------------- TOKEN DECLARATIONS ---------------- #
@@ -64,10 +65,11 @@ INVALID_ASSIGNMENT_ERROR = 'InvalidAssignmentError'
 
 # KLASI TOKEN
 class Token:
-    def __init__(self, recognized_string, family, line_number):
+    def __init__(self, recognized_string, family, line_number, file_name=None):
         self.recognized_string = recognized_string
         self.family = family
         self.line_number = line_number
+        self.file_name = file_name
 
     def __str__(self):
         return f'{self.recognized_string}\tfamily:"{self.family.name}",\tline: {self.line_number}'
@@ -127,7 +129,7 @@ class Lex:
         self.skip_whitespace()
 
         if not self.current_char:  # FTASAME SE EOF
-            return Token("", TokenFamily.EOF, self.current_line)
+            return Token("", TokenFamily.EOF, self.current_line, self.file_name)
 
         # IDENTIFIERS KAI KEYWORDS
         if self.current_char.isalpha() or self.current_char == '_':
@@ -139,7 +141,7 @@ class Lex:
                 if(len(word) >= MAX_WORD_SIZE):
                     break
             token_type = TokenFamily.KEYWORD if word in KEYWORDS else TokenFamily.IDENTIFIER
-            return Token(word, token_type, self.current_line)
+            return Token(word, token_type, self.current_line, self.file_name)
 
         # AKERAIOI
         if self.current_char.isdigit():
@@ -158,8 +160,8 @@ class Lex:
                     word += self.current_char
                     self.next_char()
                 self.throwLexError(INVALID_TOKEN_ERROR, self.current_line, word)
-                return Token(word, TokenFamily.ERROR, self.current_line)
-            return Token(word, TokenFamily.NUMBER, self.current_line)
+                return Token(word, TokenFamily.ERROR, self.current_line, self.file_name)
+            return Token(word, TokenFamily.NUMBER, self.current_line, self.file_name)
 
         # RELATIONAL OPS: <, >, <=, =, >=, <>
         if self.current_char in {'<', '>', '='}:
@@ -170,28 +172,28 @@ class Lex:
             if (word in {'<', '>'} and next_word == '=') or (word == '<' and next_word == '>'):  # <=, >=, <>
                 word += next_word
                 self.next_char()
-            return Token(word, TokenFamily.RELATIONAL_OPERATOR, line)
+            return Token(word, TokenFamily.RELATIONAL_OPERATOR, line, self.file_name)
 
         # ANATHESI
         if self.current_char == ':':
             self.next_char()
             if self.current_char == '=':
                 self.next_char()
-                return Token(":=", TokenFamily.ASSIGNMENT, self.current_line)
+                return Token(":=", TokenFamily.ASSIGNMENT, self.current_line, self.file_name)
             self.throwLexError(INVALID_ASSIGNMENT_ERROR, self.current_line)
-            return Token(":", TokenFamily.ERROR, self.current_line)  # Mh egkyro ':'
+            return Token(":", TokenFamily.ERROR, self.current_line, self.file_name)  # Invalid ':'
        
         # PERASMA ME ANAFORA
         if self.current_char == '%':
             self.next_char()
-            return Token("%", TokenFamily.PASSBYREFERENCE, self.current_line)
+            return Token("%", TokenFamily.PASSBYREFERENCE, self.current_line, self.file_name)
             
         # ARITHMITIKA OPS KAI SYMVOLA
         if self.current_char in OPS_AND_SYMBOLS:
             word = self.current_char
             token_type = OPS_AND_SYMBOLS.get(self.current_char)
             self.next_char()
-            return Token(word, token_type, self.current_line)
+            return Token(word, token_type, self.current_line, self.file_name)
 
         # SXOLIA
         if self.current_char == '{':
@@ -206,7 +208,7 @@ class Lex:
         error_char = self.current_char
         self.throwLexError(INVALID_TOKEN_ERROR, self.current_line, error_char)
         self.next_char()
-        return Token(error_char, TokenFamily.ERROR, self.current_line)
+        return Token(error_char, TokenFamily.ERROR, self.current_line, self.file_name)
 
     # SYNARTHSH POU KANEI TIN LEKTIKH ANALYSH
     def analyze(self):
@@ -293,6 +295,80 @@ class SymbolTable:
         self.add_symbol(temp_name, SymbolType.TEMPORARY)
         return temp_name
 
+    def print_scope_info(self, output_file=None):
+        """Print or save the symbol table scope information"""
+        if output_file:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write("Symbol Table Scope Information\n")
+                f.write("=" * 50 + "\n\n")
+                
+                # Group symbols by scope
+                scopes = {}
+                for (name, scope), symbol in self.symbols.items():
+                    if scope not in scopes:
+                        scopes[scope] = []
+                    scopes[scope].append(symbol)
+                
+                # Print global scope first
+                if "global" in scopes:
+                    f.write("Global Scope:\n")
+                    f.write("-" * 20 + "\n")
+                    for symbol in scopes["global"]:
+                        f.write(f"Name: {symbol.name}\n")
+                        f.write(f"Type: {symbol.symbol_type.name}\n")
+                        f.write(f"Offset: {symbol.offset}\n")
+                        if symbol.parameter_mode:
+                            f.write(f"Parameter Mode: {symbol.parameter_mode}\n")
+                        f.write("\n")
+                    del scopes["global"]
+                
+                # Print other scopes
+                for scope, symbols in scopes.items():
+                    f.write(f"Scope: {scope}\n")
+                    f.write("-" * 20 + "\n")
+                    for symbol in symbols:
+                        f.write(f"Name: {symbol.name}\n")
+                        f.write(f"Type: {symbol.symbol_type.name}\n")
+                        f.write(f"Offset: {symbol.offset}\n")
+                        if symbol.parameter_mode:
+                            f.write(f"Parameter Mode: {symbol.parameter_mode}\n")
+                        f.write("\n")
+        else:
+            print("\nSymbol Table Scope Information")
+            print("=" * 50)
+            
+            # Group symbols by scope
+            scopes = {}
+            for (name, scope), symbol in self.symbols.items():
+                if scope not in scopes:
+                    scopes[scope] = []
+                scopes[scope].append(symbol)
+            
+            # Print global scope first
+            if "global" in scopes:
+                print("\nGlobal Scope:")
+                print("-" * 20)
+                for symbol in scopes["global"]:
+                    print(f"Name: {symbol.name}")
+                    print(f"Type: {symbol.symbol_type.name}")
+                    print(f"Offset: {symbol.offset}")
+                    if symbol.parameter_mode:
+                        print(f"Parameter Mode: {symbol.parameter_mode}")
+                    print()
+                del scopes["global"]
+            
+            # Print other scopes
+            for scope, symbols in scopes.items():
+                print(f"\nScope: {scope}")
+                print("-" * 20)
+                for symbol in symbols:
+                    print(f"Name: {symbol.name}")
+                    print(f"Type: {symbol.symbol_type.name}")
+                    print(f"Offset: {symbol.offset}")
+                    if symbol.parameter_mode:
+                        print(f"Parameter Mode: {symbol.parameter_mode}")
+                    print()
+
 ###########################
 # DIAXEIRISTIS TETRADWN #
 ###########################
@@ -332,8 +408,8 @@ class QuadManager:
         """Print or save the generated intermediate code"""
         if output_file:
             with open(output_file, 'w', encoding='utf-8') as f:
-                f.write(f"Intermediate Code for Program: {self.program_name}\n")
-                f.write("-" * 50 + "\n")
+                #f.write(f"Intermediate Code for Program: {self.program_name}\n")
+                #f.write("-" * 50 + "\n")
                 for quad_num, op, arg1, arg2, result in self.quads:
                     # Format operands to match test1.int style
                     arg1 = arg1 if arg1 != "_" else "_"
@@ -371,6 +447,9 @@ class Syntax:
         self.if_list = []
         self.while_list = []
         self.for_list = []
+        
+        # Store function blocks to be generated after their calls
+        self.function_blocks = {}
         
         print("\n-- Syntax Analyzer --")
         print("Beginning syntactical analysis...\n")
@@ -425,11 +504,22 @@ class Syntax:
         
         # Print intermediate code
         self.quad_manager.print_intermediate_code()
-        # Optionally save to file
-        output_file = f"{self.quad_manager.program_name}_intermediate.txt"
-        self.quad_manager.print_intermediate_code(output_file)
-        print(f"\nIntermediate code saved to: {output_file}")
+        
+        # Get the input filename from the lexer's file_name attribute
+        input_file = self.tokens[0].file_name if hasattr(self.tokens[0], 'file_name') else "output"
+        # Get just the filename without path
+        input_filename = os.path.basename(input_file)
+        # Replace .gr extension with .int
+        output_filename = input_filename.replace('.gr', '.int')
+        
+        # Save to file with .int extension in current directory
+        self.quad_manager.print_intermediate_code(output_filename)
+        print(f"\nIntermediate code saved to: {output_filename}")
 
+        # Save symbol table scope information
+        scope_filename = input_filename.replace('.gr', '.scope')
+        self.symbol_table.print_scope_info(scope_filename)
+        print(f"Symbol table scope information saved to: {scope_filename}")
 
     # --------------------------------------- #
     # Modified methods for intermediate code generation #
@@ -512,6 +602,9 @@ class Syntax:
         self.symbol_table.add_symbol(func_name, SymbolType.FUNCTION)
         self.symbol_table.enter_scope(func_name)
         
+        # Store the current quad position for this function
+        start_quad = self.quad_manager.next_quad()
+        
         # Generate function begin quad
         self.quad_manager.gen_quad("begin_block", func_name, "_", "_")
 
@@ -525,10 +618,14 @@ class Syntax:
         if self.current_token.recognized_string != ")":
             self.error_expected(")")
 
-        self.funcblock()
+        # Store the function block instead of generating it immediately
+        self.function_blocks[func_name] = {
+            'start_quad': start_quad,
+            'end_quad': None,  # Will be set when we generate the end block
+            'scope': func_name
+        }
         
-        # Generate function end quad
-        self.quad_manager.gen_quad("end_block", func_name, "_", "_")
+        self.funcblock()
         
         # Return to global scope
         self.symbol_table.exit_scope()
@@ -547,6 +644,9 @@ class Syntax:
         self.symbol_table.add_symbol(proc_name, SymbolType.PROCEDURE)
         self.symbol_table.enter_scope(proc_name)
         
+        # Store the current quad position for this procedure
+        start_quad = self.quad_manager.next_quad()
+        
         # Generate procedure begin quad
         self.quad_manager.gen_quad("begin_block", proc_name, "_", "_")
         
@@ -560,10 +660,14 @@ class Syntax:
         if self.current_token.recognized_string != ")":
             self.error_expected(")")
 
-        self.procblock()
+        # Store the procedure block instead of generating it immediately
+        self.function_blocks[proc_name] = {
+            'start_quad': start_quad,
+            'end_quad': None,  # Will be set when we generate the end block
+            'scope': proc_name
+        }
         
-        # Generate procedure end quad
-        self.quad_manager.gen_quad("end_block", proc_name, "_", "_")
+        self.procblock()
         
         # Return to global scope
         self.symbol_table.exit_scope()
@@ -955,6 +1059,29 @@ class Syntax:
             result_temp = self.symbol_table.new_temp()
             self.quad_manager.gen_quad("par", result_temp, "RET", "_")
             return result_temp
+            
+        # Generate the function/procedure block if it hasn't been generated yet
+        if proc_name in self.function_blocks and self.function_blocks[proc_name]['end_quad'] is None:
+            # Save current scope
+            current_scope = self.symbol_table.current_scope
+            
+            # Enter function scope
+            self.symbol_table.enter_scope(proc_name)
+            
+            # Generate the function block
+            if proc_symbol.symbol_type == SymbolType.FUNCTION:
+                self.funcblock()
+            else:
+                self.procblock()
+                
+            # Generate end block quad
+            self.quad_manager.gen_quad("end_block", proc_name, "_", "_")
+            
+            # Update the end quad in the function blocks
+            self.function_blocks[proc_name]['end_quad'] = self.quad_manager.next_quad()
+            
+            # Restore original scope
+            self.symbol_table.enter_scope(current_scope)
 
     def idtail(self):
         if self.next_token().recognized_string == "(":
