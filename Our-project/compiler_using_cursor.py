@@ -290,7 +290,7 @@ class SymbolTable:
 
     def new_temp(self):
         """Create a new temporary variable and return its name"""
-        temp_name = f"T@{self.temp_counter}"
+        temp_name = f"t@{self.temp_counter}"  # Use lowercase t@
         self.temp_counter += 1
         self.add_symbol(temp_name, SymbolType.TEMPORARY)
         return temp_name
@@ -376,25 +376,31 @@ class SymbolTable:
 class QuadManager:
     def __init__(self):
         self.quads = []
-        self.next_label = 0
+        self.next_label = 1  # Start from 1 instead of 0
         self.program_name = ""
 
     def gen_quad(self, op, arg1, arg2, result):
         """Generate a new quad and add it to the list"""
-        quad = (len(self.quads) + 1, op, arg1, arg2, result)
+        quad = (self.next_label, op, arg1, arg2, result)  # Use next_label instead of len(quads)
         self.quads.append(quad)
-        return len(self.quads)
+        self.next_label += 1  # Increment next_label
+        return self.next_label - 1  # Return the current label
 
     def next_quad(self):
         """Return the label of the next quad"""
-        return len(self.quads) + 1
+        return self.next_label
 
     def backpatch(self, list_of_quads, label):
         """Fill in the result field of quads in the list with label"""
         for quad_index in list_of_quads:
             if 0 < quad_index <= len(self.quads):
                 quad_num, op, arg1, arg2, _ = self.quads[quad_index - 1]
-                self.quads[quad_index - 1] = (quad_num, op, arg1, arg2, label)
+                if op in {'<', '>', '<=', '>=', '=', '<>'}:
+                    # For comparison operators, target is the next quad
+                    self.quads[quad_index - 1] = (quad_num, op, arg1, arg2, str(label ))
+                else:
+                    # For jumps, target is the label
+                    self.quads[quad_index - 1] = (quad_num, op, arg1, arg2, str(label))
 
     def merge_lists(self, list1, list2):
         """Merge two lists of quad indices"""
@@ -408,14 +414,19 @@ class QuadManager:
         """Print or save the generated intermediate code"""
         if output_file:
             with open(output_file, 'w', encoding='utf-8') as f:
-                #f.write(f"Intermediate Code for Program: {self.program_name}\n")
-                #f.write("-" * 50 + "\n")
+                f.write(f"Program: {self.program_name}\n")
+                f.write("-" * 50 + "\n")
                 for quad_num, op, arg1, arg2, result in self.quads:
                     # Format operands to match test1.int style
                     arg1 = arg1 if arg1 != "_" else "_"
                     arg2 = arg2 if arg2 != "_" else "_"
                     result = result if result != "_" else "_"
                     f.write(f"{quad_num} : {op} , {arg1} , {arg2} , {result}\n")
+                # Add halt instruction before end_block
+                f.write(f"{self.next_label} : halt , _ , _ , _\n")
+                # Add end_block instruction only if not already present
+                if not any(q[1] == "end_block" for q in self.quads):
+                    f.write(f"{self.next_label + 1} : end_block , {self.program_name} , _ , _\n")
         else:
             print("\n-- Intermediate Code --")
             print(f"Program: {self.program_name}")
@@ -426,6 +437,11 @@ class QuadManager:
                 arg2 = arg2 if arg2 != "_" else "_"
                 result = result if result != "_" else "_"
                 print(f"{quad_num} : {op} , {arg1} , {arg2} , {result}")
+            # Add halt instruction before end_block
+            #print(f"{self.next_label} : halt , _ , _ , _")
+            # Add end_block instruction only if not already present
+            #if not any(q[1] == "end_block" for q in self.quads):
+            #   print(f"{self.next_label + 1} : end_block , {self.program_name} , _ , _")
 
 ########################
 # SYNTAKTIKOS ANALYTIS #
@@ -517,7 +533,7 @@ class Syntax:
         print(f"\nIntermediate code saved to: {output_filename}")
 
         # Save symbol table scope information
-        scope_filename = input_filename.replace('.gr', '.scope')
+        scope_filename = input_filename.replace('.gr', '.sym')
         self.symbol_table.print_scope_info(scope_filename)
         print(f"Symbol table scope information saved to: {scope_filename}")
 
@@ -541,6 +557,7 @@ class Syntax:
         self.programblock()
         
         # End program
+        self.quad_manager.gen_quad("halt", "_", "_", "_")
         self.quad_manager.gen_quad("end_block", self.quad_manager.program_name, "_", "_")
         
     def programblock(self):
@@ -846,6 +863,9 @@ class Syntax:
         # Backpatch true list to current quad (loop body)
         self.quad_manager.backpatch(true_list, self.quad_manager.next_quad())
         
+        # Store start of loop body
+        body_start = self.quad_manager.next_quad()
+        
         self.sequence()
         
         # Generate jump back to condition
@@ -1001,7 +1021,7 @@ class Syntax:
             self.error_message(f"Undeclared variable '{var_name}'")
             
         # Generate input quad
-        self.quad_manager.gen_quad("in", "_", "_", var_name)
+        self.quad_manager.gen_quad("in", var_name,"_", "_")
 
     def call_stat(self):
         self.get_token()
@@ -1153,6 +1173,14 @@ class Syntax:
             # The new false list is just the next term's false list
             false_list = next_false_list
             
+        # Adjust jump targets for comparison quads
+        for quad_index in true_list:
+            if 0 < quad_index <= len(self.quad_manager.quads):
+                quad_num, op, arg1, arg2, _ = self.quad_manager.quads[quad_index - 1]
+                if op in {'<', '>', '<=', '>=', '=', '<>'}:
+                    # For comparison operators, target is the next quad
+                    self.quad_manager.quads[quad_index - 1] = (quad_num, op, arg1, arg2, str(self.quad_manager.next_quad()))
+            
         return true_list, false_list
 
     def boolterm(self):
@@ -1204,25 +1232,21 @@ class Syntax:
         rel_op = self.relational_oper()
         right_expr = self.expression()
         
-        # Create a temporary for the result of the comparison
-        result_temp = self.symbol_table.new_temp()
+        # Generate comparison quad with target being the next quad
+        comp_quad = self.quad_manager.gen_quad(rel_op, left_expr, right_expr, "_")
         
-        # Generate comparison quad
-        self.quad_manager.gen_quad(rel_op, left_expr, right_expr, result_temp)
-        
-        # Generate conditional jump quads
+        # Create lists for true and false cases
         if not_flag:
-            # For NOT, jump if condition is true (non-zero)
-            false_quad = self.quad_manager.gen_quad("jumpnz", result_temp, "_", "_")
-            true_quad = self.quad_manager.gen_quad("jump", "_", "_", "_")
-            true_list = self.quad_manager.make_list(true_quad)
-            false_list = self.quad_manager.make_list(false_quad)
+            # For NOT, swap the true and false lists
+            false_list = self.quad_manager.make_list(comp_quad)
+            true_list = self.quad_manager.make_list(self.quad_manager.next_quad())
+            # Add jump to skip the false case
+            self.quad_manager.gen_quad("jump", "_", "_", "_")
         else:
-            # Normal case, jump if condition is true (non-zero)
-            true_quad = self.quad_manager.gen_quad("jumpnz", result_temp, "_", "_")
-            false_quad = self.quad_manager.gen_quad("jump", "_", "_", "_")
-            true_list = self.quad_manager.make_list(true_quad)
-            false_list = self.quad_manager.make_list(false_quad)
+            true_list = self.quad_manager.make_list(comp_quad)
+            false_list = self.quad_manager.make_list(self.quad_manager.next_quad())
+            # Add jump to skip the true case
+            self.quad_manager.gen_quad("jump", "_", "_", "_")
             
         return true_list, false_list
 
@@ -1237,8 +1261,9 @@ class Syntax:
         
         # Apply the sign if present
         if sign == "-":
+            # Create a temporary for the negative value
             neg_temp = self.symbol_table.new_temp()
-            self.quad_manager.gen_quad("uminus", term_result, "_", neg_temp)
+            self.quad_manager.gen_quad("-", "0", term_result, neg_temp)
             term_result = neg_temp
         
         # Process additional terms
