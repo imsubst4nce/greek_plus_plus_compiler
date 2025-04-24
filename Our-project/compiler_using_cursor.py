@@ -12,7 +12,7 @@ from enum import Enum, auto
 
 # ---------------- TOKEN DECLARATIONS ---------------- #
 
-# TOKEN FAMILIES 
+# TOKEN FAMILIES
 class TokenFamily(Enum):
     NUMBER = 0 # an ta valw ola auto() ksekinaei apo 1, giafto to vazw apo 0
     IDENTIFIER = auto()
@@ -22,7 +22,6 @@ class TokenFamily(Enum):
     RELATIONAL_OPERATOR = auto()
     DELIMITER = auto()
     GROUP_SYMBOL = auto()
-    #QUOTE = auto() to vlepoume
     COMMENT = auto()
     PASSBYREFERENCE = auto()
     EOF = auto()
@@ -89,15 +88,15 @@ class Lex:
             print(f"Opening file '{file_name}'...")
             self.file = open(file_name, 'r', encoding='utf-8')
             print(f"Beginning lectical analysis...\n")
-            self.next_char() 
+            self.next_char()
         except FileNotFoundError:
             print(f"Error: File '{file_name}' not found.")
             sys.exit(1)
-    
+
     # DESTRUCTOR METHODOS
     def __del__(self):
         print("\n-- Lex Analyzer finished --")
-    
+
     # LEXER ERROR METHODOS - DEN SKAEI TO PROGRAMMA
     def throwLexError(self, errorType, line, invalid_token=''):
         match errorType:
@@ -110,12 +109,12 @@ class Lex:
     def next_char(self):
         self.current_char = self.file.read(1)
         return self.current_char
-    
+
     # EPOMENH GRAMMI
     def next_line(self):
         self.current_line += 1
         return self.current_line
-    
+
     # PROSPERNAEI KENOUS XARAKTIRES
     def skip_whitespace(self):
         while self.current_char in WHITESPACES:
@@ -182,12 +181,12 @@ class Lex:
                 return Token(":=", TokenFamily.ASSIGNMENT, self.current_line, self.file_name)
             self.throwLexError(INVALID_ASSIGNMENT_ERROR, self.current_line)
             return Token(":", TokenFamily.ERROR, self.current_line, self.file_name)  # Invalid ':'
-       
+
         # PERASMA ME ANAFORA
         if self.current_char == '%':
             self.next_char()
             return Token("%", TokenFamily.PASSBYREFERENCE, self.current_line, self.file_name)
-            
+
         # ARITHMITIKA OPS KAI SYMVOLA
         if self.current_char in OPS_AND_SYMBOLS:
             word = self.current_char
@@ -201,7 +200,7 @@ class Lex:
                 if self.current_char == "\n": # se periptwsi pou to sxolio einai pollaples grammes prepei na prosmetrountai
                     self.skip_whitespace()
                 self.next_char()
-            self.next_char()  
+            self.next_char()
             return self.get_token()
 
         # MI DEKTOI XARAKTIRES
@@ -216,11 +215,11 @@ class Lex:
 
         while True:
             token = self.get_token()
-            
+
             if token.family == TokenFamily.EOF:
                 print("-- Reached EOF --")
                 break
-            
+
             tokens.append(token) # DEN THELOUME TO EOF
             print(token)
 
@@ -266,7 +265,7 @@ class SymbolTable:
         key = (name, self.current_scope)
         if key in self.symbols:
             return False  # Symbol already exists in current scope
-        
+
         self.symbols[key] = Symbol(name, symbol_type, self.current_scope, self.offset, parameter_mode)
         self.offset += 4  # Assuming 4 bytes per variable
         return True
@@ -274,18 +273,18 @@ class SymbolTable:
     def lookup(self, name, scope=None):
         if scope is None:
             scope = self.current_scope
-        
+
         # Check in specified scope
         key = (name, scope)
         if key in self.symbols:
             return self.symbols[key]
-        
+
         # If not found and we're in a local scope, check global
         if scope != "global":
             key = (name, "global")
             if key in self.symbols:
                 return self.symbols[key]
-        
+
         return None
 
     def new_temp(self):
@@ -301,14 +300,14 @@ class SymbolTable:
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write("Symbol Table Scope Information\n")
                 f.write("=" * 50 + "\n\n")
-                
+
                 # Group symbols by scope
                 scopes = {}
                 for (name, scope), symbol in self.symbols.items():
                     if scope not in scopes:
                         scopes[scope] = []
                     scopes[scope].append(symbol)
-                
+
                 # Print global scope first
                 if "global" in scopes:
                     f.write("Global Scope:\n")
@@ -321,7 +320,7 @@ class SymbolTable:
                             f.write(f"Parameter Mode: {symbol.parameter_mode}\n")
                         f.write("\n")
                     del scopes["global"]
-                
+
                 # Print other scopes
                 for scope, symbols in scopes.items():
                     f.write(f"Scope: {scope}\n")
@@ -336,14 +335,14 @@ class SymbolTable:
         else:
             print("\nSymbol Table Scope Information")
             print("=" * 50)
-            
+
             # Group symbols by scope
             scopes = {}
             for (name, scope), symbol in self.symbols.items():
                 if scope not in scopes:
                     scopes[scope] = []
                 scopes[scope].append(symbol)
-            
+
             # Print global scope first
             if "global" in scopes:
                 print("\nGlobal Scope:")
@@ -356,7 +355,7 @@ class SymbolTable:
                         print(f"Parameter Mode: {symbol.parameter_mode}")
                     print()
                 del scopes["global"]
-            
+
             # Print other scopes
             for scope, symbols in scopes.items():
                 print(f"\nScope: {scope}")
@@ -369,9 +368,9 @@ class SymbolTable:
                         print(f"Parameter Mode: {symbol.parameter_mode}")
                     print()
 
-###########################
-# DIAXEIRISTIS TETRADWN #
-###########################
+#########################
+# DIAXEIRISTIS TETRADWN # 
+#########################
 
 class QuadManager:
     def __init__(self):
@@ -437,11 +436,6 @@ class QuadManager:
                 arg2 = arg2 if arg2 != "_" else "_"
                 result = result if result != "_" else "_"
                 print(f"{quad_num} : {op} , {arg1} , {arg2} , {result}")
-            # Add halt instruction before end_block
-            #print(f"{self.next_label} : halt , _ , _ , _")
-            # Add end_block instruction only if not already present
-            #if not any(q[1] == "end_block" for q in self.quads):
-            #   print(f"{self.next_label + 1} : end_block , {self.program_name} , _ , _")
 
 ########################
 # SYNTAKTIKOS ANALYTIS #
@@ -455,32 +449,32 @@ class Syntax:
         self.current_token = self.tokens[self.token_index]
         self.symbol_table = SymbolTable()
         self.quad_manager = QuadManager()
-        
+
         # For expression evaluation
         self.place_stack = []
-        
+
         # For control flow
         self.if_list = []
         self.while_list = []
         self.for_list = []
-        
+
         # Store function blocks to be generated after their calls
         self.function_blocks = {}
-        
+
         print("\n-- Syntax Analyzer --")
         print("Beginning syntactical analysis...\n")
 
     # destructor
     def __del__(self):
         print("\n-- Syntax Analyzer finished --")
-    
+
     # methodos pou epistrefei tokens
     def get_token(self):
         self.token_index += 1
         if self.token_index < len(self.tokens):
             self.current_token = self.tokens[self.token_index]
             return self.current_token
-        
+
     def next_token(self):
         if self.token_index + 1 < len(self.tokens):
             return self.tokens[self.token_index + 1]
@@ -494,7 +488,7 @@ class Syntax:
     def throwInvalidError(self):
         print(f"Syntax Error at line {self.current_token.line_number}: Got invalid phrase '{self.current_token.recognized_string}'.")
         sys.exit(1)
-    
+
     def error_expected(self, expected):
         print(f"Syntax Error at line {self.current_token.line_number}: Expected '{expected}', but got '{self.current_token.recognized_string}'.")
         sys.exit(1)
@@ -506,7 +500,7 @@ class Syntax:
     def error_message(self, message):
         print(f"Syntax Error at line {self.current_token.line_number}: {message}.")
         sys.exit(1)
-        
+
     # methodos analysis pou ksekinaei tin syntaktiki analysi me ti
     # methodo anadromikis katavasis
     def analyze(self):
@@ -517,17 +511,17 @@ class Syntax:
 
         self.program()
         print(f"--No errors--")
-        
+
         # Print intermediate code
         self.quad_manager.print_intermediate_code()
-        
+
         # Get the input filename from the lexer's file_name attribute
         input_file = self.tokens[0].file_name if hasattr(self.tokens[0], 'file_name') else "output"
         # Get just the filename without path
         input_filename = os.path.basename(input_file)
         # Replace .gr extension with .int
         output_filename = input_filename.replace('.gr', '.int')
-        
+
         # Save to file with .int extension in current directory
         self.quad_manager.print_intermediate_code(output_filename)
         print(f"\nIntermediate code saved to: {output_filename}")
@@ -543,34 +537,34 @@ class Syntax:
     def program(self):
         if self.current_token.recognized_string != "πρόγραμμα":
             self.error_message("Program should start with 'πρόγραμμα'")
-        
+
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
             self.error_message("'πρόγραμμα' should be followed by <PROGRAM_NAME> of type <IDENTIFIER>")
-        
+
         # Set program name
         self.quad_manager.program_name = self.current_token.recognized_string
-        
+
         # Start with program
         self.quad_manager.gen_quad("begin_block", self.current_token.recognized_string, "_", "_")
-        
+
         self.programblock()
-        
+
         # End program
         self.quad_manager.gen_quad("halt", "_", "_", "_")
         self.quad_manager.gen_quad("end_block", self.quad_manager.program_name, "_", "_")
-        
+
     def programblock(self):
         self.declarations()
         if (self.next_token().recognized_string == "συνάρτηση") or (self.next_token().recognized_string == "διαδικασία"):
             self.subprograms()
-        
+
         self.get_token()
         if self.current_token.recognized_string != "αρχή_προγράμματος":
             self.error_message("'αρχή_προγράμματος' not found")
-        
+
         self.sequence()
-        
+
         self.get_token()
         if self.current_token.recognized_string != "τέλος_προγράμματος":
             self.error_expected("τέλος_προγράμματος")
@@ -586,15 +580,15 @@ class Syntax:
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
             self.error_message("'δήλωση' should be of type: δήλωση <IDENTIFIER>, ... ,<IDENTIFIER>")
-        
+
         # Add variable to symbol table
         var_name = self.current_token.recognized_string
         self.symbol_table.add_symbol(var_name, SymbolType.VARIABLE)
-        
+
         while self.next_token().recognized_string == ',':
             self.get_token()
             self.varlist()
-        
+
     def subprograms(self):
         if self.next_token().recognized_string == "συνάρτηση":
             self.func()
@@ -613,15 +607,15 @@ class Syntax:
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
             self.error_message("'συνάρτηση' should be followed by <FUNCTION_NAME> of type <IDENTIFIER>")
-        
+
         # Add function to symbol table and set current scope
         func_name = self.current_token.recognized_string
         self.symbol_table.add_symbol(func_name, SymbolType.FUNCTION)
         self.symbol_table.enter_scope(func_name)
-        
+
         # Store the current quad position for this function
         start_quad = self.quad_manager.next_quad()
-        
+
         # Generate function begin quad
         self.quad_manager.gen_quad("begin_block", func_name, "_", "_")
 
@@ -641,9 +635,9 @@ class Syntax:
             'end_quad': None,  # Will be set when we generate the end block
             'scope': func_name
         }
-        
+
         self.funcblock()
-        
+
         # Return to global scope
         self.symbol_table.exit_scope()
 
@@ -660,13 +654,13 @@ class Syntax:
         proc_name = self.current_token.recognized_string
         self.symbol_table.add_symbol(proc_name, SymbolType.PROCEDURE)
         self.symbol_table.enter_scope(proc_name)
-        
+
         # Store the current quad position for this procedure
         start_quad = self.quad_manager.next_quad()
-        
+
         # Generate procedure begin quad
         self.quad_manager.gen_quad("begin_block", proc_name, "_", "_")
-        
+
         self.get_token()
         if self.current_token.recognized_string != "(":
             self.error_expected("(")
@@ -683,9 +677,9 @@ class Syntax:
             'end_quad': None,  # Will be set when we generate the end block
             'scope': proc_name
         }
-        
+
         self.procblock()
-        
+
         # Return to global scope
         self.symbol_table.exit_scope()
 
@@ -740,7 +734,7 @@ class Syntax:
             self.varlist()
         else:
             return
-    
+
     def funcoutput(self):
         if self.next_token().recognized_string == "έξοδος":
             self.get_token()
@@ -778,7 +772,7 @@ class Syntax:
             return
         elif self.next_token().recognized_string == "εκτέλεσε":
             self.call_stat()
-            return  
+            return
 
         self.get_token()
         self.error_message("No assignment or <εάν, όσο, επανάλαβε, για, διάβασε, γράψε, εκτέλεσε> found.\nCheck for unnecessary extra ';' at end of block")
@@ -787,10 +781,10 @@ class Syntax:
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
             self.throwTypeError(TokenFamily.IDENTIFIER)
-        
+
         # Store the target variable
         target_var = self.current_token.recognized_string
-        
+
         # Make sure variable exists in symbol table
         if not self.symbol_table.lookup(target_var):
             self.error_message(f"Undeclared variable '{target_var}'")
@@ -801,7 +795,7 @@ class Syntax:
 
         # Get the result of expression
         result = self.expression()
-        
+
         # Generate assignment quad
         self.quad_manager.gen_quad(":=", result, "_", target_var)
 
@@ -812,28 +806,28 @@ class Syntax:
 
         # Get condition result and true/false jump lists
         true_list, false_list = self.condition()
-        
+
         self.get_token()
         if self.current_token.recognized_string != "τότε":
             self.error_expected("τότε")
-        
+
         # Backpatch true list to current quad
         self.quad_manager.backpatch(true_list, self.quad_manager.next_quad())
-        
+
         self.sequence()
-        
+
         # Create jump quad for end of if statement
         jump_quad = self.quad_manager.gen_quad("jump", "_", "_", "_")
         end_if_list = self.quad_manager.make_list(jump_quad)
-        
+
         # Backpatch false list to current quad
         self.quad_manager.backpatch(false_list, self.quad_manager.next_quad())
-        
+
         self.elsepart()
-        
+
         # Backpatch end_if_list to current quad
         self.quad_manager.backpatch(end_if_list, self.quad_manager.next_quad())
-        
+
         self.get_token()
         if self.current_token.recognized_string != "εάν_τέλος":
             self.error_expected("εάν_τέλος")
@@ -842,35 +836,32 @@ class Syntax:
         if self.next_token().recognized_string == "αλλιώς":
             self.get_token()
             self.sequence()
-        else: 
+        else:
             return
 
     def while_stat(self):
         self.get_token()
         if self.current_token.recognized_string != "όσο":
             self.error_expected("όσο")
-        
+
         # Store start of condition for looping back
         while_start = self.quad_manager.next_quad()
-        
+
         # Get condition result and true/false jump lists
         true_list, false_list = self.condition()
 
         self.get_token()
         if self.current_token.recognized_string != "επανάλαβε":
             self.error_expected("επανάλαβε")
-        
+
         # Backpatch true list to current quad (loop body)
         self.quad_manager.backpatch(true_list, self.quad_manager.next_quad())
-        
-        # Store start of loop body
-        body_start = self.quad_manager.next_quad()
-        
+
         self.sequence()
-        
+
         # Generate jump back to condition
         self.quad_manager.gen_quad("jump", "_", "_", while_start)
-        
+
         # Backpatch false list to next quad (exit loop)
         self.quad_manager.backpatch(false_list, self.quad_manager.next_quad())
 
@@ -882,23 +873,23 @@ class Syntax:
         self.get_token()
         if self.current_token.recognized_string != "επανάλαβε":
             self.error_expected("επανάλαβε")
-        
+
         # Store start of loop body for looping back
         do_start = self.quad_manager.next_quad()
-        
+
         self.sequence()
-        
+
         self.get_token()
         if self.current_token.recognized_string != "μέχρι":
             self.error_expected("μέχρι")
-            
+
         # Get condition result and true/false jump lists
         true_list, false_list = self.condition()
-        
+
         # For do-until, we need to jump back to start if the condition is FALSE
         # So we backpatch the true_list to exit the loop and false_list to loop back
         self.quad_manager.backpatch(false_list, do_start)
-        
+
         # Backpatch true list to next quad (exit loop)
         self.quad_manager.backpatch(true_list, self.quad_manager.next_quad())
 
@@ -910,10 +901,10 @@ class Syntax:
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
             self.throwTypeError(TokenFamily.IDENTIFIER)
-            
+
         # Store loop counter variable
         counter_var = self.current_token.recognized_string
-        
+
         # Make sure variable exists in symbol table
         if not self.symbol_table.lookup(counter_var):
             self.error_message(f"Undeclared variable '{counter_var}'")
@@ -924,65 +915,65 @@ class Syntax:
 
         # Get initial value for counter
         initial_value = self.expression()
-        
+
         # Generate assignment for initial value
         self.quad_manager.gen_quad(":=", initial_value, "_", counter_var)
-        
+
         self.get_token()
         if self.current_token.recognized_string != "έως":
             self.error_expected("έως")
-            
+
         # Get final value for counter
         final_value = self.expression()
-        
+
         # Create a temporary for the final value
         final_temp = self.symbol_table.new_temp()
         self.quad_manager.gen_quad(":=", final_value, "_", final_temp)
-        
+
         # Store step value (default is 1)
         step_value = "1"
         self.step()
-        
+
         # Check if a custom step was provided
         if hasattr(self, 'custom_step_value'):
             step_value = self.custom_step_value
             delattr(self, 'custom_step_value')
-        
+
         # Store step in a temporary
         step_temp = self.symbol_table.new_temp()
         self.quad_manager.gen_quad(":=", step_value, "_", step_temp)
-        
+
         # Label for the start of the loop
         for_start = self.quad_manager.next_quad()
-        
+
         # Generate comparison: counter <= final_value (or >= for negative step)
         cond_temp = self.symbol_table.new_temp()
         if step_value.startswith("-"):
             self.quad_manager.gen_quad(">=", counter_var, final_temp, cond_temp)
         else:
             self.quad_manager.gen_quad("<=", counter_var, final_temp, cond_temp)
-            
+
         # Conditional jump out of loop if condition is false
         cond_quad = self.quad_manager.gen_quad("jumpz", cond_temp, "_", "_")
         false_list = self.quad_manager.make_list(cond_quad)
-        
+
         self.get_token()
         if self.current_token.recognized_string != "επανάλαβε":
             self.error_expected("επανάλαβε")
-            
+
         self.sequence()
-        
+
         # Increment counter: counter := counter + step
         inc_temp = self.symbol_table.new_temp()
         self.quad_manager.gen_quad("+", counter_var, step_temp, inc_temp)
         self.quad_manager.gen_quad(":=", inc_temp, "_", counter_var)
-        
+
         # Jump back to condition
         self.quad_manager.gen_quad("jump", "_", "_", for_start)
-        
+
         # Backpatch the false list to exit the loop
         self.quad_manager.backpatch(false_list, self.quad_manager.next_quad())
-        
+
         self.get_token()
         if self.current_token.recognized_string != "για_τέλος":
             self.error_expected("για_τέλος")
@@ -992,16 +983,16 @@ class Syntax:
             self.get_token()
             step_result = self.expression()
             self.custom_step_value = step_result
-        else: 
+        else:
             return
 
     def print_stat(self):
         self.get_token()
         if self.current_token.recognized_string != "γράψε":
             self.error_expected("γράψε")
-            
+
         output_value = self.expression()
-        
+
         # Generate print quad
         self.quad_manager.gen_quad("out", output_value, "_", "_")
 
@@ -1009,17 +1000,17 @@ class Syntax:
         self.get_token()
         if self.current_token.recognized_string != "διάβασε":
             self.error_expected("διάβασε")
-            
+
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
             self.error_message("'διάβασε' should be followed by type <IDENTIFIER>'")
-            
+
         var_name = self.current_token.recognized_string
-        
+
         # Make sure variable exists in symbol table
         if not self.symbol_table.lookup(var_name):
             self.error_message(f"Undeclared variable '{var_name}'")
-            
+
         # Generate input quad
         self.quad_manager.gen_quad("in", var_name,"_", "_")
 
@@ -1027,25 +1018,25 @@ class Syntax:
         self.get_token()
         if self.current_token.recognized_string != "εκτέλεσε":
             self.error_expected("εκτέλεσε")
-            
+
         self.get_token()
         if self.current_token.family != TokenFamily.IDENTIFIER:
             self.error_message("'εκτέλεσε' should be followed by type <IDENTIFIER>'")
-            
+
         proc_name = self.current_token.recognized_string
-        
+
         # Check if the procedure exists
         proc_symbol = self.symbol_table.lookup(proc_name)
         if not proc_symbol or proc_symbol.symbol_type not in [SymbolType.PROCEDURE, SymbolType.FUNCTION]:
             self.error_message(f"Undefined procedure/function '{proc_name}'")
-            
+
         # Process parameters if any
         param_list = []
-        
+
         # Check if there are actual parameters
         if self.next_token().recognized_string == "(":
             self.get_token()  # consume '('
-            
+
             # Parse actual parameters
             if self.next_token().recognized_string != ")":
                 while True:
@@ -1060,46 +1051,46 @@ class Syntax:
                         # Handle pass-by-value parameters
                         param_value = self.expression()
                         param_list.append(("CV", param_value))
-                    
+
                     if self.next_token().recognized_string != ",":
                         break
                     self.get_token()  # consume ','
-            
+
             self.get_token()  # consume ')'
-        
+
         # Generate parameter passing quads
         for i, (mode, param) in enumerate(param_list):
             self.quad_manager.gen_quad("par", param, mode, str(i+1))
-        
+
         # Generate call quad
         self.quad_manager.gen_quad("call", proc_name, "_", "_")
-        
+
         # If it's a function, create a temporary for the result
         if proc_symbol and proc_symbol.symbol_type == SymbolType.FUNCTION:
             result_temp = self.symbol_table.new_temp()
             self.quad_manager.gen_quad("par", result_temp, "RET", "_")
             return result_temp
-            
+
         # Generate the function/procedure block if it hasn't been generated yet
         if proc_name in self.function_blocks and self.function_blocks[proc_name]['end_quad'] is None:
             # Save current scope
             current_scope = self.symbol_table.current_scope
-            
+
             # Enter function scope
             self.symbol_table.enter_scope(proc_name)
-            
+
             # Generate the function block
             if proc_symbol.symbol_type == SymbolType.FUNCTION:
                 self.funcblock()
             else:
                 self.procblock()
-                
+
             # Generate end block quad
             self.quad_manager.gen_quad("end_block", proc_name, "_", "_")
-            
+
             # Update the end quad in the function blocks
             self.function_blocks[proc_name]['end_quad'] = self.quad_manager.next_quad()
-            
+
             # Restore original scope
             self.symbol_table.enter_scope(current_scope)
 
@@ -1112,41 +1103,41 @@ class Syntax:
         self.get_token()
         if self.current_token.recognized_string != "(":
             self.error_expected("(")
-            
+
         param_list = self.actualparlist()
-        
+
         self.get_token()
         if self.current_token.recognized_string != ")":
             self.error_expected(")")
-            
+
         return param_list
 
     def actualparlist(self):
         param_list = []
-        
+
         if self.next_token().recognized_string == ")":
             return param_list
-            
+
         param = self.actualparitem()
         if param:
             param_list.append(param)
-            
+
         while self.next_token().recognized_string == ",":
             self.get_token()
             param = self.actualparitem()
             if param:
                 param_list.append(param)
-                
+
         return param_list
 
     def actualparitem(self):
         if self.next_token().family == TokenFamily.PASSBYREFERENCE:
             self.get_token()
-            
+
             self.get_token()
             if self.current_token.family != TokenFamily.IDENTIFIER:
                 self.error_message("'%' should be followed by type <IDENTIFIER>'")
-                
+
             return ("REF", self.current_token.recognized_string)
         else:
             expr_result = self.expression()
@@ -1155,24 +1146,24 @@ class Syntax:
     def condition(self):
         # Get boolean term result
         true_list, false_list = self.boolterm()
-        
+
         # Process 'ή' (OR) operators
         while self.next_token().recognized_string == "ή":
             self.get_token()
-            
+
             # Backpatch the false list of the current term to the next quad
             # This implements short-circuit evaluation
             self.quad_manager.backpatch(false_list, self.quad_manager.next_quad())
-            
+
             # Get the next term's true/false lists
             next_true_list, next_false_list = self.boolterm()
-            
+
             # Merge the true lists
             true_list = self.quad_manager.merge_lists(true_list, next_true_list)
-            
+
             # The new false list is just the next term's false list
             false_list = next_false_list
-            
+
         # Adjust jump targets for comparison quads
         for quad_index in true_list:
             if 0 < quad_index <= len(self.quad_manager.quads):
@@ -1180,30 +1171,30 @@ class Syntax:
                 if op in {'<', '>', '<=', '>=', '=', '<>'}:
                     # For comparison operators, target is the next quad
                     self.quad_manager.quads[quad_index - 1] = (quad_num, op, arg1, arg2, str(self.quad_manager.next_quad()))
-            
+
         return true_list, false_list
 
     def boolterm(self):
         # Get boolean factor result
         true_list, false_list = self.boolfactor()
-        
+
         # Process 'και' (AND) operators
         while self.next_token().recognized_string == "και":
             self.get_token()
-            
+
             # Backpatch the true list of the current factor to the next quad
             # This implements short-circuit evaluation
             self.quad_manager.backpatch(true_list, self.quad_manager.next_quad())
-            
+
             # Get the next factor's true/false lists
             next_true_list, next_false_list = self.boolfactor()
-            
+
             # The new true list is just the next factor's true list
             true_list = next_true_list
-            
+
             # Merge the false lists
             false_list = self.quad_manager.merge_lists(false_list, next_false_list)
-            
+
         return true_list, false_list
 
     def boolfactor(self):
@@ -1212,7 +1203,7 @@ class Syntax:
         if self.next_token().recognized_string == "όχι":
             self.get_token()
             not_flag = True
-            
+
         # Handle parenthesized condition
         if self.next_token().recognized_string == "[":
             self.get_token()
@@ -1220,21 +1211,21 @@ class Syntax:
             self.get_token()
             if self.current_token.recognized_string != "]":
                 self.error_expected("]")
-                
+
             # If NOT is present, swap the true and false lists
             if not_flag:
                 true_list, false_list = false_list, true_list
-                
+
             return true_list, false_list
-        
+
         # Handle relational expression
         left_expr = self.expression()
         rel_op = self.relational_oper()
         right_expr = self.expression()
-        
+
         # Generate comparison quad with target being the next quad
         comp_quad = self.quad_manager.gen_quad(rel_op, left_expr, right_expr, "_")
-        
+
         # Create lists for true and false cases
         if not_flag:
             # For NOT, swap the true and false lists
@@ -1247,7 +1238,7 @@ class Syntax:
             false_list = self.quad_manager.make_list(self.quad_manager.next_quad())
             # Add jump to skip the true case
             self.quad_manager.gen_quad("jump", "_", "_", "_")
-            
+
         return true_list, false_list
 
     def expression(self):
@@ -1255,77 +1246,77 @@ class Syntax:
         sign = None
         if (self.next_token().recognized_string == "+") or (self.next_token().recognized_string == "-"):
             sign = self.add_oper()
-        
+
         # Get the first term
         term_result = self.term()
-        
+
         # Apply the sign if present
         if sign == "-":
             # Create a temporary for the negative value
             neg_temp = self.symbol_table.new_temp()
             self.quad_manager.gen_quad("-", "0", term_result, neg_temp)
             term_result = neg_temp
-        
+
         # Process additional terms
         while (self.next_token().recognized_string == "+") or (self.next_token().recognized_string == "-"):
             op = self.add_oper()
             next_term = self.term()
-            
+
             # Create a temporary for the result
             result_temp = self.symbol_table.new_temp()
-            
+
             # Generate quad for the operation
             self.quad_manager.gen_quad(op, term_result, next_term, result_temp)
-            
+
             # Update the current result
             term_result = result_temp
-            
+
         return term_result
 
     def term(self):
         # Get the first factor
         factor_result = self.factor()
-        
+
         # Process additional factors
         while (self.next_token().recognized_string == "*") or (self.next_token().recognized_string == "/"):
             op = self.mul_oper()
             next_factor = self.factor()
-            
+
             # Create a temporary for the result
             result_temp = self.symbol_table.new_temp()
-            
+
             # Generate quad for the operation
             self.quad_manager.gen_quad(op, factor_result, next_factor, result_temp)
-            
+
             # Update the current result
             factor_result = result_temp
-            
+
         return factor_result
 
     def factor(self):
         self.get_token()
-        
+
         # Handle number
         if self.current_token.family == TokenFamily.NUMBER:
             return self.current_token.recognized_string
-            
+
         # Handle parenthesized expression
         elif self.current_token.recognized_string == "(":
             expr_result = self.expression()
-            
+
             self.get_token()
             if self.current_token.recognized_string != ")":
                 self.error_expected(")")
-                
+
             return expr_result
-            
+
         # Handle identifier (variable or function call)
         elif self.current_token.family == TokenFamily.IDENTIFIER:
             var_name = self.current_token.recognized_string
-            
+
             # Check for function call
             func_call_result = self.idtail()
-            
+
             if func_call_result is not None:
                 # It's a function call, return the temporary with the result
                 return func_call_result
@@ -1343,21 +1334,21 @@ class Syntax:
         self.get_token()
         if self.current_token.family != TokenFamily.RELATIONAL_OPERATOR:
             self.throwTypeError(TokenFamily.RELATIONAL_OPERATOR)
-            
+
         return self.current_token.recognized_string
 
     def add_oper(self):
         self.get_token()
         if (self.current_token.recognized_string != "+") and (self.current_token.recognized_string != "-"):
             self.error_expected("+ or -")
-            
+
         return self.current_token.recognized_string
 
     def mul_oper(self):
         self.get_token()
         if (self.current_token.recognized_string != "*") and (self.current_token.recognized_string != "/"):
             self.error_expected("* or /")
-            
+
         return self.current_token.recognized_string
 
     def optional_sign(self):
@@ -1377,10 +1368,10 @@ if __name__ == "__main__":
         print("Error: File must be of .gr type")
         print("Exiting...")
         sys.exit(1)
-    
+
     file_name = sys.argv[1]
-    
-    # Kataskevi antikeimenou tis klasis lexer kai klisi 
+
+    # Kataskevi antikeimenou tis klasis lexer kai klisi
     # tis methodou lektikis analysis gia eksagwgi twn tokens
     lexer = Lex(file_name)
     tokens = lexer.analyze()
