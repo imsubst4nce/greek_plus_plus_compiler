@@ -1,0 +1,73 @@
+Symbol Table Scope Information
+==================================================
+
+Global Scope:
+--------------------
+Name: income
+Type: VARIABLE
+Offset: 0
+
+Name: tax
+Type: VARIABLE
+Offset: 4
+
+Name: t@0
+Type: TEMPORARY
+Offset: 8
+
+Name: t@1
+Type: TEMPORARY
+Offset: 12
+
+Name: t@2
+Type: TEMPORARY
+Offset: 16
+
+Name: t@3
+Type: TEMPORARY
+Offset: 20
+
+Name: t@4
+Type: TEMPORARY
+Offset: 24
+
+Name: t@5
+Type: TEMPORARY
+Offset: 28
+
+Name: t@6
+Type: TEMPORARY
+Offset: 32
+
+Name: t@7
+Type: TEMPORARY
+Offset: 36
+
+Name: t@8
+Type: TEMPORARY
+Offset: 40
+
+Name: t@9
+Type: TEMPORARY
+Offset: 44
+
+Name: t@10
+Type: TEMPORARY
+Offset: 48
+
+Name: t@11
+Type: TEMPORARY
+Offset: 52
+
+Name: t@12
+Type: TEMPORARY
+Offset: 56
+
+Name: t@13
+Type: TEMPORARY
+Offset: 60
+
+Name: t@14
+Type: TEMPORARY
+Offset: 64
+

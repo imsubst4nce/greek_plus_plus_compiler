@@ -405,12 +405,7 @@ class QuadManager:
         for quad_index in list_of_quads:
             if 0 < quad_index <= len(self.quads):
                 quad_num, op, arg1, arg2, _ = self.quads[quad_index - 1]
-                if op in {'<', '>', '<=', '>=', '=', '<>'}:
-                    # For comparison operators, target is the next quad
-                    self.quads[quad_index - 1] = (quad_num, op, arg1, arg2, str(label + 1))
-                else:
-                    # For jumps, target is the label
-                    self.quads[quad_index - 1] = (quad_num, op, arg1, arg2, str(label))
+                self.quads[quad_index - 1] = (quad_num, op, arg1, arg2, str(label))
 
     # Sinenwsi listwn
     def merge_lists(self, list1, list2):
