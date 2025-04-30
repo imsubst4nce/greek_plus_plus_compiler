@@ -103,7 +103,7 @@ class Lex:
             case 'InvalidTokenError':
                 print(f"### Lexer error at line '{line}' => Invalid token '{invalid_token}'. ###")
             case 'InvalidAssignmentError':
-                print(f"### Lexer error at line '{line}' => Bad use of ':' operator. Typically only '=' can follow. ###")
+                print(f"### Lexer error at line '{line}' => Bad use of ':' operator. Received: '{invalid_token}'. Typically only '=' can follow. ###")
 
     # EPOMENH LEKSI
     def next_char(self):
@@ -127,7 +127,8 @@ class Lex:
         # TSEKAREI GIA WHITESPACE
         self.skip_whitespace()
 
-        if not self.current_char:  # FTASAME SE EOF
+        # FTASAME SE EOF
+        if not self.current_char:
             return Token("", TokenFamily.EOF, self.current_line, self.file_name)
 
         # IDENTIFIERS KAI KEYWORDS
@@ -167,7 +168,6 @@ class Lex:
             word = self.current_char
             line = self.current_line
             next_word = self.next_char() # epomeni leksi
-
             if (word in {'<', '>'} and next_word == '=') or (word == '<' and next_word == '>'):  # <=, >=, <>
                 word += next_word
                 self.next_char()
@@ -175,12 +175,14 @@ class Lex:
 
         # ANATHESI
         if self.current_char == ':':
-            self.next_char()
-            if self.current_char == '=':
+            word = self.current_char
+            next_word = self.next_char()
+            if next_word == '=':
+                assignment = word + next_word
                 self.next_char()
-                return Token(":=", TokenFamily.ASSIGNMENT, self.current_line, self.file_name)
-            self.throwLexError(INVALID_ASSIGNMENT_ERROR, self.current_line)
-            return Token(":", TokenFamily.ERROR, self.current_line, self.file_name)  # Invalid ':'
+                return Token(assignment, TokenFamily.ASSIGNMENT, self.current_line, self.file_name)
+            self.throwLexError(INVALID_ASSIGNMENT_ERROR, self.current_line, word+next_word)
+            return Token(word+next_word, TokenFamily.ERROR, self.current_line, self.file_name)  # Invalid ':'
 
         # PERASMA ME ANAFORA
         if self.current_char == '%':
@@ -205,8 +207,8 @@ class Lex:
 
         # MI DEKTOI XARAKTIRES
         error_char = self.current_char
-        self.throwLexError(INVALID_TOKEN_ERROR, self.current_line, error_char)
         self.next_char()
+        self.throwLexError(INVALID_TOKEN_ERROR, self.current_line, error_char)
         return Token(error_char, TokenFamily.ERROR, self.current_line, self.file_name)
 
     # SYNARTHSH POU KANEI TIN LEKTIKH ANALYSH
@@ -244,71 +246,79 @@ class Symbol:
         self.name = name
         self.symbol_type = symbol_type
         self.scope = scope
-        self.offset = offset  # Memory offset
-        self.parameter_mode = parameter_mode  # CV (Call by Value) or REF (Call by Reference)
+        self.offset = offset  # Offset mnimis
+        self.parameter_mode = parameter_mode  # CV (Call by Value) alliws REF (Call by Reference)
 
 class SymbolTable:
     def __init__(self):
         self.symbols = {}
         self.current_scope = "global"
         self.offset = 0
-        self.temp_counter = 0
+        self.temp_counter = 0  # Metritis gia tis temporary metavlites
 
+    # Eisodos se neo code block
     def enter_scope(self, scope_name):
         self.current_scope = scope_name
-        self.offset = 0  # Reset offset for new scope
+        self.offset = 0  # Epanafora tou offset
 
+    # Eksodos apo code block
     def exit_scope(self):
         self.current_scope = "global"
 
+    # Prosthiki symbolou ston pinaka
     def add_symbol(self, name, symbol_type, parameter_mode=None):
         key = (name, self.current_scope)
+
+        # Elegxos an to symbolo yparxei hdh
         if key in self.symbols:
-            return False  # Symbol already exists in current scope
+            return False
 
         self.symbols[key] = Symbol(name, symbol_type, self.current_scope, self.offset, parameter_mode)
-        self.offset += 4  # Assuming 4 bytes per variable
+        self.offset += 4  # Ypothetoume 4 bytes gia kathe metavliti
         return True
 
+    # Anazhthsh symbolou ston pinaka
     def lookup(self, name, scope=None):
+        # An den dinetai to scope, thewroume to trexon
         if scope is None:
             scope = self.current_scope
 
-        # Check in specified scope
+        # Elegxos an to symbolo yparxei
         key = (name, scope)
         if key in self.symbols:
             return self.symbols[key]
 
-        # If not found and we're in a local scope, check global
+        # An den exei akoma vrethei, anazhthsh sto global scope
         if scope != "global":
             key = (name, "global")
             if key in self.symbols:
                 return self.symbols[key]
 
+        # An den vrethei kai sto global scope
         return None
 
+    # Dhmiourgia neas temporary metavlitis kai epistrofi tou onomatos tis
     def new_temp(self):
-        """Create a new temporary variable and return its name"""
-        temp_name = f"t@{self.temp_counter}"  # Use lowercase t@
+        temp_name = f"t@{self.temp_counter}"  # Xrisi lowercase t@
         self.temp_counter += 1
-        self.add_symbol(temp_name, SymbolType.TEMPORARY)
+        self.add_symbol(temp_name, SymbolType.TEMPORARY)  # Eisagogi ston pinaka symbolon
         return temp_name
 
+    # Ektypwsi h apothikefsi twn pliroforiwn tou pinaka symbolon gia ta scopes
     def print_scope_info(self, output_file=None):
-        """Print or save the symbol table scope information"""
         if output_file:
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write("Symbol Table Scope Information\n")
                 f.write("=" * 50 + "\n\n")
 
-                # Group symbols by scope
+                # Omadopoihsh symbolwn ana scope
                 scopes = {}
                 for (name, scope), symbol in self.symbols.items():
                     if scope not in scopes:
                         scopes[scope] = []
                     scopes[scope].append(symbol)
 
-                # Print global scope first
+                # Arxika katagrafh tou global scope
                 if "global" in scopes:
                     f.write("Global Scope:\n")
                     f.write("-" * 20 + "\n")
@@ -321,7 +331,7 @@ class SymbolTable:
                         f.write("\n")
                     del scopes["global"]
 
-                # Print other scopes
+                # Katagrafh twn allown scopes
                 for scope, symbols in scopes.items():
                     f.write(f"Scope: {scope}\n")
                     f.write("-" * 20 + "\n")
@@ -336,14 +346,14 @@ class SymbolTable:
             print("\nSymbol Table Scope Information")
             print("=" * 50)
 
-            # Group symbols by scope
+            # Omadopoihsh symbolwn ana scope
             scopes = {}
             for (name, scope), symbol in self.symbols.items():
                 if scope not in scopes:
                     scopes[scope] = []
                 scopes[scope].append(symbol)
 
-            # Print global scope first
+            # Arxika ektypwsi tou global scope
             if "global" in scopes:
                 print("\nGlobal Scope:")
                 print("-" * 20)
@@ -356,7 +366,7 @@ class SymbolTable:
                     print()
                 del scopes["global"]
 
-            # Print other scopes
+            # Ektypwsh twn allown scopes
             for scope, symbols in scopes.items():
                 print(f"\nScope: {scope}")
                 print("-" * 20)
@@ -375,55 +385,55 @@ class SymbolTable:
 class QuadManager:
     def __init__(self):
         self.quads = []
-        self.next_label = 1  # Start from 1 instead of 0
-        self.program_name = ""
+        self.next_label = 1  # Arxh apo to 1
+        self.program_name = "" 
 
+    # Paragwgh neas tetradas kai prosthikh ths sthn lista
     def gen_quad(self, op, arg1, arg2, result):
-        """Generate a new quad and add it to the list"""
-        quad = (self.next_label, op, arg1, arg2, result)  # Use next_label instead of len(quads)
+        quad = (self.next_label, op, arg1, arg2, result)  # Xrisi tou next_label anti gia len(self.quads)
         self.quads.append(quad)
-        self.next_label += 1  # Increment next_label
-        return self.next_label - 1  # Return the current label
+        self.next_label += 1  # Afksisi tou next_label
+        return self.next_label - 1  # Epistrofi tou trexontos label
 
+    # Epistrofi tou label tis epomenis tetradas
     def next_quad(self):
-        """Return the label of the next quad"""
         return self.next_label
 
+    # Gemisma tou pediou result twn tetradwn me label
     def backpatch(self, list_of_quads, label):
-        """Fill in the result field of quads in the list with label"""
         for quad_index in list_of_quads:
             if 0 < quad_index <= len(self.quads):
                 quad_num, op, arg1, arg2, _ = self.quads[quad_index - 1]
                 if op in {'<', '>', '<=', '>=', '=', '<>'}:
                     # For comparison operators, target is the next quad
-                    self.quads[quad_index - 1] = (quad_num, op, arg1, arg2, str(label ))
+                    self.quads[quad_index - 1] = (quad_num, op, arg1, arg2, str(label + 1))
                 else:
                     # For jumps, target is the label
                     self.quads[quad_index - 1] = (quad_num, op, arg1, arg2, str(label))
 
+    # Sinenwsi listwn
     def merge_lists(self, list1, list2):
-        """Merge two lists of quad indices"""
         return list1 + list2
 
+    # Kataskevi neas listas pou periexei mono to quad_index
     def make_list(self, quad_index):
-        """Create a new list containing only quad_index"""
         return [quad_index]
 
+    # Ektypwsi h apothikefsi tou paraxthein endiamesou kwdika
     def print_intermediate_code(self, output_file=None):
-        """Print or save the generated intermediate code"""
         if output_file:
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write(f"Program: {self.program_name}\n")
                 f.write("-" * 50 + "\n")
                 for quad_num, op, arg1, arg2, result in self.quads:
-                    # Format operands to match test1.int style
+                    # Morfopoihsh
                     arg1 = arg1 if arg1 != "_" else "_"
                     arg2 = arg2 if arg2 != "_" else "_"
                     result = result if result != "_" else "_"
                     f.write(f"{quad_num} : {op} , {arg1} , {arg2} , {result}\n")
-                # Add halt instruction before end_block
+                # Prosthiki tou halt instruction prin to telos
                 f.write(f"{self.next_label} : halt , _ , _ , _\n")
-                # Add end_block instruction only if not already present
+                # Prosthiki tou end_block instruction mono ean den uparxei hdh
                 if not any(q[1] == "end_block" for q in self.quads):
                     f.write(f"{self.next_label + 1} : end_block , {self.program_name} , _ , _\n")
         else:
@@ -431,7 +441,6 @@ class QuadManager:
             print(f"Program: {self.program_name}")
             print("-" * 50)
             for quad_num, op, arg1, arg2, result in self.quads:
-                # Format operands to match test1.int style
                 arg1 = arg1 if arg1 != "_" else "_"
                 arg2 = arg2 if arg2 != "_" else "_"
                 result = result if result != "_" else "_"
