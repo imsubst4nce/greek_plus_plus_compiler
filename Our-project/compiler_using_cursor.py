@@ -51,6 +51,7 @@ WHITESPACES = {' ', '\t', '\r', '\n'}
 
 # ANWTATOS ARITHMOS XARAKTIRWN LEKSIS
 MAX_WORD_SIZE = 30
+NUMBER_LIMITS = [-32767, 32767]
 
 # ERRORS
 INVALID_TOKEN_ERROR = 'InvalidTokenError'
@@ -508,6 +509,10 @@ class Syntax:
 
     def throwCustomError(self, message):
         print(f"Syntax Error at line {self.current_token.line_number}: {message}.")
+        sys.exit(1)
+
+    def throwNumberOutOfRangeError(self, token):
+        print(f"Syntax Error at line {token.line_number}: Got number out of range '{token.recognized_string}'.")
         sys.exit(1)
 
     # Methodos analysis pou ksekinaei tin syntaktiki analysi me ti
@@ -1300,8 +1305,10 @@ class Syntax:
     def factor(self):
         self.get_token()
 
-        # Xeirismos arithmou
+        # Elegxos gia arithmo out of range
         if self.current_token.family == TokenFamily.NUMBER:
+            if int(self.current_token.recognized_string) < NUMBER_LIMITS[0] or int(self.current_token.recognized_string) > NUMBER_LIMITS[1]:
+                self.throwNumberOutOfRangeError(self.current_token)
             return self.current_token.recognized_string
 
         # Xeirismos ekfrasis se parenthesi
