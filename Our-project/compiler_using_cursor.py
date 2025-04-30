@@ -1080,7 +1080,8 @@ class Syntax:
             self.quad_manager.gen_quad("par", result_temp, "RET", "_")
             return result_temp
 
-        # THIS IF MAYBE CREATES SOME ISSUES - CHECK IT OUT BEFORE SUBMITTING CODE
+        """
+        # CAUTION!!! THIS CODE CREATES SOME ISSUES - CHECK IT OUT BEFORE SUBMITTING CODE
         # Dhmiourgia tou function/proc block an den exei ginei hdh
         if proc_name in self.function_blocks and self.function_blocks[proc_name]['end_quad'] is None:
             # Krataw to trexon scope
@@ -1104,6 +1105,7 @@ class Syntax:
         
             # Epistrofi sto trexon scope
             self.symbol_table.enter_scope(current_scope)
+        """
 
     def idtail(self):
         if self.next_token().recognized_string == "(":
