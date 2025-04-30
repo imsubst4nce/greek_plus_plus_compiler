@@ -570,7 +570,8 @@ class Syntax:
 
     def programblock(self):
         self.declarations()
-        if (self.next_token().recognized_string == "συνάρτηση") or (self.next_token().recognized_string == "διαδικασία"):
+        next_token = self.next_token()
+        if next_token and (next_token.recognized_string == "συνάρτηση" or next_token.recognized_string == "διαδικασία"):
             self.subprograms()
 
         self.get_token()
@@ -612,6 +613,7 @@ class Syntax:
             self.proc()
             self.subprograms()
             return
+        return
 
     def func(self):
         self.get_token()
@@ -1043,7 +1045,7 @@ class Syntax:
         # Elegxos an yparxoun parametroi
         if self.next_token().recognized_string == "(":
             self.get_token() # katanalwsh '('
-
+            
             # Analisi parametrwn
             if self.next_token().recognized_string != ")":
                 while True:
@@ -1078,26 +1080,28 @@ class Syntax:
             self.quad_manager.gen_quad("par", result_temp, "RET", "_")
             return result_temp
 
+        # THIS IF MAYBE CREATES SOME ISSUES - CHECK IT OUT BEFORE SUBMITTING CODE
         # Dhmiourgia tou function/proc block an den exei ginei hdh
         if proc_name in self.function_blocks and self.function_blocks[proc_name]['end_quad'] is None:
             # Krataw to trexon scope
             current_scope = self.symbol_table.current_scope
-
+        
             # Eisodos sto scope tis sinartisis
             self.symbol_table.enter_scope(proc_name)
-
-            # Dhmiourgia block sinartisis
-            if proc_symbol.symbol_type == SymbolType.FUNCTION:
-                self.funcblock()
-            else:
-                self.procblock()
-
+        
+            # Dhmiourgia block sinartisis - AFTO DEN PREPEI NA GINETAI EDW
+            # if proc_symbol.symbol_type == SymbolType.FUNCTION:
+            #    self.funcblock()
+            # else:
+            #    # self.procblock()
+            #    pass
+        
             # Paragwgh tetradas end block
             self.quad_manager.gen_quad("end_block", proc_name, "_", "_")
-
+        
             # Ananewsi tis end tetradas sta function blocks
             self.function_blocks[proc_name]['end_quad'] = self.quad_manager.next_quad()
-
+        
             # Epistrofi sto trexon scope
             self.symbol_table.enter_scope(current_scope)
 

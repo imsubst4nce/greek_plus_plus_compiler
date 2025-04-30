@@ -15,6 +15,10 @@ Name: t@1
 Type: TEMPORARY
 Offset: 12
 
+Name: t@2
+Type: TEMPORARY
+Offset: 16
+
 Scope: αύξηση_ηλικίας
 --------------------
 Name: α
