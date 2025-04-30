@@ -51,7 +51,7 @@ WHITESPACES = {' ', '\t', '\r', '\n'}
 
 # ANWTATOS ARITHMOS XARAKTIRWN LEKSIS
 MAX_WORD_SIZE = 30
-NUMBER_LIMITS = [-32767, 32767]
+ACCEPTED_NUMBER_RANGE = [-32768, 32767]
 
 # ERRORS
 INVALID_TOKEN_ERROR = 'InvalidTokenError'
@@ -1307,7 +1307,7 @@ class Syntax:
 
         # Elegxos gia arithmo out of range
         if self.current_token.family == TokenFamily.NUMBER:
-            if int(self.current_token.recognized_string) < NUMBER_LIMITS[0] or int(self.current_token.recognized_string) > NUMBER_LIMITS[1]:
+            if int(self.current_token.recognized_string) < ACCEPTED_NUMBER_RANGE[0] or int(self.current_token.recognized_string) > ACCEPTED_NUMBER_RANGE[1]:
                 self.throwNumberOutOfRangeError(self.current_token)
             return self.current_token.recognized_string
 
