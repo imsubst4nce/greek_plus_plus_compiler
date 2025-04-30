@@ -1,0 +1,31 @@
+Symbol Table Scope Information
+==================================================
+
+Global Scope:
+--------------------
+Name: ηλικία
+Type: VARIABLE
+Offset: 0
+
+Name: αύξηση_ηλικίας
+Type: FUNCTION
+Offset: 4
+
+Name: t@1
+Type: TEMPORARY
+Offset: 12
+
+Scope: αύξηση_ηλικίας
+--------------------
+Name: α
+Type: VARIABLE
+Offset: 0
+
+Name: β
+Type: VARIABLE
+Offset: 4
+
+Name: t@0
+Type: TEMPORARY
+Offset: 8
+
