@@ -432,8 +432,9 @@ class QuadManager:
                     arg2 = arg2 if arg2 != "_" else "_"
                     result = result if result != "_" else "_"
                     f.write(f"{quad_num} : {op} , {arg1} , {arg2} , {result}\n")
-                # Prosthiki tou halt instruction prin to telos
-                f.write(f"{self.next_label} : halt , _ , _ , _\n")
+                # Prosthiki tou halt instruction prin to telos mono ean den uparxei hdh
+                if not any(q[1] == "halt" for q in self.quads):
+                    f.write(f"{self.next_label} : halt , _ , _ , _\n")
                 # Prosthiki tou end_block instruction mono ean den uparxei hdh
                 if not any(q[1] == "end_block" for q in self.quads):
                     f.write(f"{self.next_label + 1} : end_block , {self.program_name} , _ , _\n")
