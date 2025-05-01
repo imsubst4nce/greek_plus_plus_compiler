@@ -761,33 +761,34 @@ class Syntax:
             self.statement()
 
     def statement(self):
-        if self.next_token().family == TokenFamily.IDENTIFIER:
+        next_token = self.next_token()
+        if next_token and next_token.family == TokenFamily.IDENTIFIER:
             self.assignment_stat()
             return
-        elif self.next_token().recognized_string == "εάν":
+        elif next_token and next_token.recognized_string == "εάν":
             self.if_stat()
             return
-        elif self.next_token().recognized_string == "όσο":
+        elif next_token and next_token.recognized_string == "όσο":
             self.while_stat()
             return
-        elif self.next_token().recognized_string == "επανάλαβε":
+        elif next_token and next_token.recognized_string == "επανάλαβε":
             self.do_stat()
             return
-        elif self.next_token().recognized_string == "για":
+        elif next_token and next_token.recognized_string == "για":
             self.for_stat()
             return
-        elif self.next_token().recognized_string == "διάβασε":
+        elif next_token and next_token.recognized_string == "διάβασε":
             self.input_stat()
             return
-        elif self.next_token().recognized_string == "γράψε":
+        elif next_token and next_token.recognized_string == "γράψε":
             self.print_stat()
             return
-        elif self.next_token().recognized_string == "εκτέλεσε":
+        elif next_token and next_token.recognized_string == "εκτέλεσε":
             self.call_stat()
             return
-
+        
         self.get_token()
-        self.throwCustomError("No assignment or <εάν, όσο, επανάλαβε, για, διάβασε, γράψε, εκτέλεσε> found. Check for unnecessary extra ';' at end of block")
+        self.throwCustomError("No assignment or <εάν, όσο, επανάλαβε, για, διάβασε, γράψε, εκτέλεσε> found.\nCheck for unnecessary extra ';' at end of block, unclosed comment or empty program block")
 
     def assignment_stat(self):
         self.get_token()
