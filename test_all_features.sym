@@ -1,0 +1,151 @@
+Symbol Table Scope Information
+==================================================
+
+Global Scope:
+--------------------
+Name: α
+Type: VARIABLE
+Offset: 0
+
+Name: β
+Type: VARIABLE
+Offset: 4
+
+Name: γ
+Type: VARIABLE
+Offset: 8
+
+Name: δ
+Type: VARIABLE
+Offset: 12
+
+Name: ε
+Type: VARIABLE
+Offset: 16
+
+Name: αποτέλεσμα
+Type: VARIABLE
+Offset: 20
+
+Name: μετρητής
+Type: VARIABLE
+Offset: 24
+
+Name: πολλαπλασίασε
+Type: FUNCTION
+Offset: 28
+
+Name: εμφάνισε_μήνυμα
+Type: PROCEDURE
+Offset: 16
+
+Name: αύξησε_κατά_ένα
+Type: PROCEDURE
+Offset: 4
+
+Name: t@2
+Type: TEMPORARY
+Offset: 8
+
+Name: t@3
+Type: TEMPORARY
+Offset: 12
+
+Name: t@4
+Type: TEMPORARY
+Offset: 16
+
+Name: t@5
+Type: TEMPORARY
+Offset: 20
+
+Name: t@6
+Type: TEMPORARY
+Offset: 24
+
+Name: t@7
+Type: TEMPORARY
+Offset: 28
+
+Name: t@8
+Type: TEMPORARY
+Offset: 32
+
+Name: t@9
+Type: TEMPORARY
+Offset: 36
+
+Name: t@10
+Type: TEMPORARY
+Offset: 40
+
+Name: t@11
+Type: TEMPORARY
+Offset: 44
+
+Name: t@12
+Type: TEMPORARY
+Offset: 48
+
+Name: t@13
+Type: TEMPORARY
+Offset: 52
+
+Name: t@14
+Type: TEMPORARY
+Offset: 56
+
+Name: t@15
+Type: TEMPORARY
+Offset: 60
+
+Name: t@16
+Type: TEMPORARY
+Offset: 64
+
+Name: t@17
+Type: TEMPORARY
+Offset: 68
+
+Name: t@18
+Type: TEMPORARY
+Offset: 72
+
+Name: t@19
+Type: TEMPORARY
+Offset: 76
+
+Scope: πολλαπλασίασε
+--------------------
+Name: χ
+Type: VARIABLE
+Offset: 0
+
+Name: ψ
+Type: VARIABLE
+Offset: 4
+
+Name: αποτέλεσμα
+Type: VARIABLE
+Offset: 8
+
+Name: t@0
+Type: TEMPORARY
+Offset: 12
+
+Scope: εμφάνισε_μήνυμα
+--------------------
+Name: μήνυμα
+Type: VARIABLE
+Offset: 0
+
+Scope: αύξησε_κατά_ένα
+--------------------
+Name: αριθμός
+Type: VARIABLE
+Offset: 0
+
+Name: t@1
+Type: TEMPORARY
+Offset: 4
+
