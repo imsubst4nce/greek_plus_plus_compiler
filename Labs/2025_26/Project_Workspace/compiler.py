@@ -1,4 +1,5 @@
-# Case++ compiler (phase A: lexical + syntax analysis)
+# Case++ compiler (lexical + syntax analysis)
+# A.M 5108 KOUTSONIKOLIS NIKOLAOS
 # Python 3.11
 
 import sys
@@ -18,13 +19,14 @@ class TokenFamilyEnum(Enum):
     EOF = auto()
     ERROR = auto()
 
-# Reserved words
+# Keywords
 KEYWORDS = {
     'program', 'declare', 'if', 'else', 'while', 'switchcase', 'when',
     'default', 'whilecase', 'incase', 'untilcase', 'until', 'forcase',
     'return', 'print', 'input', 'function', 'in', 'inout', 'and', 'or', 'not'
 }
 
+# Operators and symbols
 OPSANDSYMBOLS = {
     '+': (TokenFamilyEnum.OPERATOR, '+'),
     '-': (TokenFamilyEnum.OPERATOR, '-'),
@@ -40,6 +42,7 @@ OPSANDSYMBOLS = {
     ']': (TokenFamilyEnum.GROUP_SYMBOL, ']'),
 }
 
+# Whitespace characters
 WHITESPACES = {
     ' ',
     '\t',
@@ -47,9 +50,13 @@ WHITESPACES = {
     '\r'
 }
 
+# Maximum word size
 MAXWORDSIZE = 30
+
+# Accepted number range
 ACCEPTEDNUMBERRANGE = (-32767, 32767)
 
+# Token class
 class Token:
     def __init__(self, string, type_, line_number, file_name=None):
         self.string = string
@@ -60,6 +67,7 @@ class Token:
     def __str__(self):
         return f'{self.string}\ttype:"{self.type.name}",\tline: {self.line_number}'
 
+# Lex class
 class Lex:
     def __init__(self, file_name):
         self.file_name = file_name
@@ -85,11 +93,11 @@ class Lex:
     def throwLexError(self, errorType, line, invalid_token=''):
         match errorType:
             case 'InvalidTokenError':
-                print(f"### Lexical Analyzer error at line '{line}' => Invalid token '{invalid_token}'. ###")
+                print(f"### Lexical error at line '{line}' => Invalid token '{invalid_token}'. ###")
             case 'InvalidAssignmentError':
-                print(f"### Lexical Analyzer error at line '{line}' => Bad use of ':' operator. Received: '{invalid_token}'. Did you mean to use ':='? ###")
+                print(f"### Lexical error at line '{line}' => Bad use of ':' operator. Received: '{invalid_token}'. Did you mean to use ':='? ###")
             case 'UnterminatedCommentError':
-                print(f"### Lexical Analyzer error at line '{line}' => Unterminated comment. ###")
+                print(f"### Lexical error at line '{line}' => Unterminated comment. ###")
 
     def next_char(self):
         self.current_char = self.file.read(1)
@@ -205,13 +213,17 @@ class Lex:
 
     def analyze(self):
         tokens = []
+
         while True:
             token = self.get_token()
+
             if token.type == TokenFamilyEnum.EOF:
                 print("-- Reached EOF --")
                 break
+
             tokens.append(token)
             print(token)
+            
         return tokens
 
 class Syntax:
