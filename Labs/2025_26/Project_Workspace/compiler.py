@@ -1,6 +1,7 @@
 # Case++ compiler (lexical + syntax analysis)
-# A.M 5108 KOUTSONIKOLIS NIKOLAOS
-# Python 3.11
+# Onomateponimo: Nikolaos Koutsounikolis
+# Username: cs205108
+# A.M 5108
 
 import sys
 from enum import Enum, auto
@@ -223,7 +224,7 @@ class Lex:
 
             tokens.append(token)
             print(token)
-            
+
         return tokens
 
 class Syntax:
