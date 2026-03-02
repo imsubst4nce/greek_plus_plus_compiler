@@ -1,9 +1,9 @@
-# Greek++ Compiler - Compilers course
+# Compilers course material
 This is the repository for the course of compilers.<br/>
 All the files are relevant to the course and its project.<br/>
 
 ## Info
-The compiler is written in Python.
+Greek++ and cast++ labs included + notes and the given handbook
 
 ### Stages
  * Lexical Analysis

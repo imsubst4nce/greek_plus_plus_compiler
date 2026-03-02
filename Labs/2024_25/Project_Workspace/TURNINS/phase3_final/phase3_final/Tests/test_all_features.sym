@@ -1,0 +1,175 @@
+Symbol Table 
+==================================================
+
+
+Global Scope:
+--------------------
+Frame Length: 120
+Nesting Level: 0
+
+Name: α
+Type: VARIABLE
+Offset: 12
+
+Name: β
+Type: VARIABLE
+Offset: 16
+
+Name: γ
+Type: VARIABLE
+Offset: 20
+
+Name: δ
+Type: VARIABLE
+Offset: 24
+
+Name: ε
+Type: VARIABLE
+Offset: 28
+
+Name: αποτέλεσμα
+Type: VARIABLE
+Offset: 32
+
+Name: μετρητής
+Type: VARIABLE
+Offset: 36
+
+Name: πολλαπλασίασε
+Type: FUNCTION
+Offset: 40
+Parameters: [('χ', 'CV'), ('ψ', 'CV')]
+Frame Length: 24
+Entry Label: 1
+
+Name: εμφάνισε_μήνυμα
+Type: PROCEDURE
+Offset: 44
+Parameters: [('μήνυμα', 'CV')]
+Frame Length: 16
+Entry Label: 5
+
+Name: αύξησε_κατά_ένα
+Type: PROCEDURE
+Offset: 48
+Parameters: [('αριθμός', 'CV')]
+Frame Length: 20
+Entry Label: 8
+
+Name: T@2
+Type: TEMPORARY
+Offset: 52
+
+Name: T@3
+Type: TEMPORARY
+Offset: 56
+
+Name: T@4
+Type: TEMPORARY
+Offset: 60
+
+Name: T@5
+Type: TEMPORARY
+Offset: 64
+
+Name: T@6
+Type: TEMPORARY
+Offset: 68
+
+Name: T@7
+Type: TEMPORARY
+Offset: 72
+
+Name: T@8
+Type: TEMPORARY
+Offset: 76
+
+Name: T@9
+Type: TEMPORARY
+Offset: 80
+
+Name: T@10
+Type: TEMPORARY
+Offset: 84
+
+Name: T@11
+Type: TEMPORARY
+Offset: 88
+
+Name: T@12
+Type: TEMPORARY
+Offset: 92
+
+Name: T@13
+Type: TEMPORARY
+Offset: 96
+
+Name: T@14
+Type: TEMPORARY
+Offset: 100
+
+Name: T@15
+Type: TEMPORARY
+Offset: 104
+
+Name: T@16
+Type: TEMPORARY
+Offset: 108
+
+Name: T@17
+Type: TEMPORARY
+Offset: 112
+
+Name: T@18
+Type: TEMPORARY
+Offset: 116
+
+
+Πολλαπλασίασε Scope:
+--------------------
+Frame Length: 24
+Nesting Level: 1
+Parent Scope: <bound method SymbolTable.current_scope of <__main__.SymbolTable object at 0x000001B3B1CA4F50>>
+
+Name: χ
+Type: PARAMETER
+Offset: 12
+Parameter Mode: CV
+
+Name: ψ
+Type: PARAMETER
+Offset: 16
+Parameter Mode: CV
+
+Name: T@0
+Type: TEMPORARY
+Offset: 20
+
+
+Εμφάνισε_Μήνυμα Scope:
+--------------------
+Frame Length: 16
+Nesting Level: 1
+Parent Scope: <bound method SymbolTable.current_scope of <__main__.SymbolTable object at 0x000001B3B1CA4F50>>
+
+Name: μήνυμα
+Type: PARAMETER
+Offset: 12
+Parameter Mode: CV
+
+
+Αύξησε_Κατά_Ένα Scope:
+--------------------
+Frame Length: 20
+Nesting Level: 1
+Parent Scope: <bound method SymbolTable.current_scope of <__main__.SymbolTable object at 0x000001B3B1CA4F50>>
+
+Name: αριθμός
+Type: PARAMETER
+Offset: 12
+Parameter Mode: CV
+
+Name: T@1
+Type: TEMPORARY
+Offset: 16
+
