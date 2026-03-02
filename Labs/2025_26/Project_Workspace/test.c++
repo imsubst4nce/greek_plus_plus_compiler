@@ -6,15 +6,12 @@ program test
     function increase(in a,inout b)
     {
         function useless()
-        {
-            function anotheruseless()
-            {
-                print 1  // τέλος statements_sequence, όχι ερωτηματικό
+        
             }
-            print (1+(+2))*3  // τέλος statements_sequence, όχι ερωτηματικό
+            print (1+(+2))*3
         }
         b := a + 1 ;
-        return a + 10  // τέλος statements_sequence, όχι ερωτηματικό
+        return a + 10
     }
 
     a := 1 ;
@@ -23,19 +20,18 @@ program test
     b := 1;
     while b<10
         if b<>22 or [b>=23 and b<=24]
-            b := b+1;     // χρειζεται ερωτηματικό,
-                          // έχουμε στη σειρά εκχώρηση, while, εκχώρηση
+            b := b+1;
     input b;
     c := 12 + (+12);
 
     switchcase
-        when a=1 : a:=a+1   // τέλος statements_sequence, όχι ερωτηματικό
-        when a=2 : a:=a+2   // τέλος statements_sequence, όχι ερωτηματικό
+        when a=1 : a:=a+1 
+        when a=2 : a:=a+2 
         when a=3 : {
                         a:=a+1;
-                        a:=a+2  // τέλος statements_sequence, όχι ερωτηματικό
+                        a:=a+2
                    }
-        default:   a:=a+1  // τέλος statements_sequence, όχι ερωτηματικό
+        default:   a:=a+1
     ;
 
 
