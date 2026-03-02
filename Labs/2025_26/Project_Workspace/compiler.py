@@ -6,6 +6,7 @@
 # PYTHON VERSION: 3.11
 
 import sys
+import os
 from enum import Enum, auto
 
 class TokenFamilyEnum(Enum):
@@ -14,26 +15,23 @@ class TokenFamilyEnum(Enum):
     KEYWORD = auto()
     OPERATOR = auto()
     ASSIGNMENT = auto()
-    RELATIONALOPERATOR = auto()
+    RELATIONAL_OPERATOR = auto()
     DELIMITER = auto()
-    GROUPSYMBOL = auto()
+    GROUP_SYMBOL = auto()
     COMMENT = auto()
-    PASSBYREFERENCE = auto()
+    PASS_BY_REFERENCE = auto()
     EOF = auto()
     ERROR = auto()
 
-# CASE++ supported characters (ίδιοι με CASE)
-ALLOWEDCHARS = "αβγδεζηθικλμνξοπρσςτυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩάέήίόύώΐΰϊϋabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789"
+ALLOWEDCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789αβγδεζηθικλμνξοπρσςτυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩάέήίόύώΐΰϊϋ"
 
-# CASE++ KEYWORDS (ΝΕΑ - προσαρμοσμένα από grammar/spec σου)
+# Case++ Keywords (σύμφωνα με το επίσημο grammar/spec)
 KEYWORDS = {
-    'program', 'declare', 'function', 'in', 'inout', 
-    'if', 'else', 'while', 'switchcase', 'whilecase', 'incase', 
-    'forcase', 'untilcase', 'print', 'input', 'return', 
-    'and', 'or', 'not', 'when', 'default', 'until'
+    'program', 'declare', 'if', 'else', 'while', 'switchcase', 'when',
+    'default', 'whilecase', 'incase', 'untilcase', 'until', 'forcase',
+    'return', 'print', 'input', 'function', 'in', 'inout', 'and', 'or', 'not'
 }
 
-# Operators & symbols
 OPSANDSYMBOLS = {
     '+': (TokenFamilyEnum.OPERATOR, '+'),
     '-': (TokenFamilyEnum.OPERATOR, '-'),
@@ -41,155 +39,201 @@ OPSANDSYMBOLS = {
     '/': (TokenFamilyEnum.OPERATOR, '/'),
     ',': (TokenFamilyEnum.DELIMITER, ','),
     ';': (TokenFamilyEnum.DELIMITER, ';'),
-    '(': (TokenFamilyEnum.GROUPSYMBOL, '('),
-    ')': (TokenFamilyEnum.GROUPSYMBOL, ')'),
-    '{': (TokenFamilyEnum.GROUPSYMBOL, '{'),
-    '}': (TokenFamilyEnum.GROUPSYMBOL, '}')
+    '(': (TokenFamilyEnum.GROUP_SYMBOL, '('),
+    ')': (TokenFamilyEnum.GROUP_SYMBOL, ')'),
+    '{': (TokenFamilyEnum.GROUP_SYMBOL, '{'),
+    '}': (TokenFamilyEnum.GROUP_SYMBOL, '}'),
+    '[': (TokenFamilyEnum.GROUP_SYMBOL, '['),
+    ']': (TokenFamilyEnum.GROUP_SYMBOL, ']'),
 }
 
-WHITESPACES = set(' \t\n\r')
+WHITESPACES = {
+    ' ',
+    '\t',
+    '\n',
+    '\r'
+}
 
 MAXWORDSIZE = 30
 ACCEPTEDNUMBERRANGE = (-32768, 32767)
 
 class Token:
-    def __init__(self, string, type_, linenumber, filename=None):
+    def __init__(self, string, type_, line_number, file_name=None):
         self.string = string
         self.type = type_
-        self.linenumber = linenumber
-        self.filename = filename
+        self.line_number = line_number
+        self.file_name = file_name
 
     def __str__(self):
-        return f"{self.string}({self.type.name}), {self.linenumber}"
+        return f'{self.string}\ttype:"{self.type.name}",\tline: {self.line_number}'
 
 class Lex:
-    def __init__(self, filename):
-        self.filename = filename
-        self.currentchar = None
-        self.currentline = 1
-        print("-- Lexical Analysis --")
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self.current_char = None
+        self.current_line = 1
+
+        print("-- Lex Analyzer --")
+
         try:
-            print(f"Opening file {filename}...")
-            self.file = open(filename, 'r', encoding='utf-8')
-            print("Beginning lexical analysis...")
-            self.nextchar()
+            print(f"Opening file '{file_name}'...")
+            self.file = open(file_name, 'r', encoding='utf-8')
+            print(f"Beginning lexical analysis...\n")
+            self.next_char()
         except FileNotFoundError:
-            print(f"Error: File {filename} not found.")
+            print(f"Error: File '{file_name}' not found.")
             sys.exit(1)
 
     def __del__(self):
-        print("-- Lexical Analysis end --")
+        if hasattr(self, 'file'):
+            self.file.close()
+        print("\n-- Lex Analyzer finished --")
 
-    def throwLexError(self, errorType, line, invalidtoken):
+    def throwLexError(self, errorType, line, invalid_token=''):
         match errorType:
             case 'InvalidTokenError':
-                print(f"Lexer error at line {line}: Invalid token '{invalidtoken}'.")
+                print(f"### Lexer error at line '{line}' => Invalid token '{invalid_token}'. ###")
             case 'InvalidAssignmentError':
-                print(f"Lexer error at line {line}: Bad use of ':='. Received '{invalidtoken}'. Typically only ':' can follow.")
+                print(f"### Lexer error at line '{line}' => Bad use of ':' operator. Received: '{invalid_token}'. Did you mean to use ':='? ###")
 
-    def nextchar(self):
-        self.currentchar = self.file.read(1)
-        return self.currentchar
+    def next_char(self):
+        self.current_char = self.file.read(1)
+        if self.current_char == '\n':
+            self.current_line += 1
+        return self.current_char
 
-    def nextline(self):
-        self.currentline += 1
-        return self.currentline
+    def skip_whitespace(self):
+        while self.current_char in WHITESPACES:
+            self.next_char()
 
-    def skipwhitespaces(self):
-        while self.currentchar in WHITESPACES:
-            if self.currentchar == '\n':
-                self.nextline()
-            self.nextchar()
+    def get_token(self):
+        self.skip_whitespace()
 
-    def gettoken(self):
-        self.skipwhitespaces()
-        if not self.currentchar:
-            return Token("", TokenFamilyEnum.EOF, self.currentline, self.filename)
+        if not self.current_char:
+            return Token("", TokenFamilyEnum.EOF, self.current_line, self.file_name)
 
+        #########################################
         # Numbers
-        if self.currentchar.isdigit():
-            word = self.currentchar
-            self.nextchar()
-            while self.currentchar and self.currentchar.isdigit():
-                word += self.currentchar
-                self.nextchar()
+        if self.current_char.isdigit():
+            word = self.current_char
+            self.next_char()
+            while self.current_char and self.current_char.isdigit():
+                word += self.current_char
+                self.next_char()
                 if len(word) > MAXWORDSIZE:
                     break
-            if int(word) < ACCEPTEDNUMBERRANGE[0] or int(word) > ACCEPTEDNUMBERRANGE[1]:
-                self.throwLexError("InvalidTokenError", self.currentline, word)
-                return Token(word, TokenFamilyEnum.ERROR, self.currentline, self.filename)
-            return Token(word, TokenFamilyEnum.NUMBER, self.currentline, self.filename)
+            try:
+                num = int(word)
+                if num < ACCEPTEDNUMBERRANGE[0] or num > ACCEPTEDNUMBERRANGE[1]:
+                    self.throwLexError("InvalidTokenError", self.current_line, word)
+                    return Token(word, TokenFamilyEnum.ERROR, self.current_line, self.file_name)
+            except ValueError:
+                self.throwLexError("InvalidTokenError", self.current_line, word)
+                return Token(word, TokenFamilyEnum.ERROR, self.current_line, self.file_name)
+            return Token(word, TokenFamilyEnum.NUMBER, self.current_line, self.file_name)
 
         # Identifiers / Keywords
-        if self.currentchar in ALLOWEDCHARS and self.currentchar != '_':  # No underscore start
-            word = self.currentchar
-            self.nextchar()
-            while self.currentchar and self.currentchar in ALLOWEDCHARS:
-                word += self.currentchar
-                self.nextchar()
+        if self.current_char in ALLOWEDCHARS:
+            word = self.current_char
+            self.next_char()
+            while self.current_char and self.current_char in ALLOWEDCHARS:
+                word += self.current_char
+                self.next_char()
                 if len(word) > MAXWORDSIZE:
                     break
-            tokentype = TokenFamilyEnum.KEYWORD if word in KEYWORDS else TokenFamilyEnum.IDENTIFIER
-            return Token(word, tokentype, self.currentline, self.filename)
+            token_type = TokenFamilyEnum.KEYWORD if word in KEYWORDS else TokenFamilyEnum.IDENTIFIER
+            return Token(word, token_type, self.current_line, self.file_name)
 
-        # Relational operators (π.χ. ==, <=)
-        if self.currentchar in {'<', '>', '='}:
-            word = self.currentchar
-            line = self.currentline
-            self.nextchar()
-            nextword = self.nextchar()
-            if word in {'<', '>'} and nextword == '=':
-                word += nextword
-                self.nextchar()
-            elif word == '=' and nextword == ':':  # :=
-                assignment = word + nextword
-                self.nextchar()
-                return Token(assignment, TokenFamilyEnum.ASSIGNMENT, self.currentline, self.filename)
-            return Token(word, TokenFamilyEnum.RELATIONALOPERATOR, line, self.filename)
+        # Relational operators, assignment (:=) and ':' delimiter
+        if self.current_char in {'<', '>', '=', ':'}:
+            line = self.current_line
+            ch = self.current_char
+            self.next_char()
+
+            # Assignment :=
+            if ch == ':' and self.current_char == '=':
+                self.next_char()
+                return Token(":=", TokenFamilyEnum.ASSIGNMENT, line, self.file_name)
+
+            # Plain ':' used in case-like constructs
+            if ch == ':':
+                return Token(":", TokenFamilyEnum.DELIMITER, line, self.file_name)
+
+            # Two-character relational operators: <=, >=, <>
+            if ch in {'<', '>'} and self.current_char == '=':
+                op = ch + '='
+                self.next_char()
+                return Token(op, TokenFamilyEnum.RELATIONAL_OPERATOR, line, self.file_name)
+            if ch == '<' and self.current_char == '>':
+                self.next_char()
+                return Token("<>", TokenFamilyEnum.RELATIONAL_OPERATOR, line, self.file_name)
+
+            # Single-character relational operators: <, >, =
+            return Token(ch, TokenFamilyEnum.RELATIONAL_OPERATOR, line, self.file_name)
 
         # Pass by reference ^
-        if self.currentchar == '^':
-            self.nextchar()
-            return Token("^", TokenFamilyEnum.PASSBYREFERENCE, self.currentline, self.filename)
+        if self.current_char == '^':
+            self.next_char()
+            return Token("^", TokenFamilyEnum.PASS_BY_REFERENCE, self.current_line, self.file_name)
+
+        # Comments and division operator
+        if self.current_char == '/':
+            line = self.current_line
+            self.next_char()
+
+            # Block comment /* ... */
+            if self.current_char == '*':
+                prev = ''
+                self.next_char()
+                while self.current_char:
+                    if prev == '*' and self.current_char == '/':
+                        self.next_char()
+                        break
+                    prev = self.current_char
+                    self.next_char()
+                return self.get_token()
+
+            # Line comment // ...
+            if self.current_char == '/':
+                self.next_char()
+                while self.current_char and self.current_char != '\n':
+                    self.next_char()
+                if self.current_char == '\n':
+                    self.next_char()
+                return self.get_token()
+
+            # Division operator '/'
+            return Token('/', TokenFamilyEnum.OPERATOR, line, self.file_name)
 
         # Operators/symbols
-        if self.currentchar in OPSANDSYMBOLS:
-            word = self.currentchar
-            tokentype = OPSANDSYMBOLS[self.currentchar][0]
-            self.nextchar()
-            return Token(word, tokentype, self.currentline, self.filename)
+        if self.current_char in OPSANDSYMBOLS:
+            word = self.current_char
+            token_type = OPSANDSYMBOLS[self.current_char][0]
+            self.next_char()
+            return Token(word, token_type, self.current_line, self.file_name)
 
-        # # Comments /* */
-        # if self.currentchar == '/':
-        #     self.nextchar()
-        #     if self.currentchar == '/':
-        #         self.nextline()
-        #         self.nextchar()
-        #     if self.currentchar == '*':
-        #         self.skipwhitespaces()
-        #         self.nextchar()
-        #         self.nextchar()
-        #         return self.gettoken()
-        # errorchar = self.currentchar
-        # self.nextchar()
-        # self.throwLexError("InvalidTokenError", self.currentline, errorchar)
-        # return Token(errorchar, TokenFamilyEnum.ERROR, self.currentline, self.filename)
+        # Error
+        error_char = self.current_char
+        self.next_char()
+        self.throwLexError("InvalidTokenError", self.current_line, error_char)
+        return Token(error_char, TokenFamilyEnum.ERROR, self.current_line, self.file_name)
 
     def analyze(self):
         tokens = []
         while True:
-            token = self.gettoken()
+            token = self.get_token()
             if token.type == TokenFamilyEnum.EOF:
                 print("-- Reached EOF --")
                 break
             tokens.append(token)
             print(token)
-        self.file.close()
         return tokens
 
 class Syntax:
     def __init__(self, tokens):
-        self.tokens = tokens
+        # Append an explicit EOF token to simplify parsing
+        eof_line = tokens[-1].line_number if tokens else 0
+        self.tokens = tokens + [Token("", TokenFamilyEnum.EOF, eof_line)]
         self.tokenindex = 0
         self.currenttoken = self.tokens[self.tokenindex]
         print("-- Syntactical Analysis --")
@@ -202,7 +246,7 @@ class Syntax:
         self.tokenindex += 1
         if self.tokenindex < len(self.tokens):
             self.currenttoken = self.tokens[self.tokenindex]
-            return self.currenttoken
+        return self.currenttoken
 
     def nexttoken(self):
         if self.tokenindex + 1 < len(self.tokens):
@@ -211,44 +255,393 @@ class Syntax:
 
     def previoustoken(self):
         self.tokenindex -= 1
-        self.currenttoken = self.tokens[self.tokenindex]
+        if self.tokenindex >= 0:
+            self.currenttoken = self.tokens[self.tokenindex]
         return self.currenttoken
 
     def error(self, message, expected=None):
         if expected:
-            print(f"Syntax Error at line {self.currenttoken.linenumber}: Expected {expected}, but got '{self.currenttoken.string}'.")
+            print(f"Syntax Error at line {self.currenttoken.line_number}: Expected {expected}, but got '{self.currenttoken.string}'.")
         else:
-            print(f"Syntax Error at line {self.currenttoken.linenumber}: {message}.")
+            print(f"Syntax Error at line {self.currenttoken.line_number}: {message}.")
         sys.exit(1)
 
     def analyze(self):
-        # Βασικός έλεγχος CASE++ grammar (επέκταση για caseblock, forcase++ κλπ)
-        i = 0
-        while i < len(self.tokens):
-            token = self.tokens[i]
-            if token.type.name == 'ERROR':
-                self.error(f"Got invalid phrase '{token.string}'")
-            # Νέος έλεγχος π.χ. για case++ ID { ... }
-            if token.string == 'case++':
-                if i+1 >= len(self.tokens) or self.tokens[i+1].type != TokenFamilyEnum.IDENTIFIER:
-                    self.error("Expected ID after case++")
-                i += 3  # skip ID {
-            # Άλλοι έλεγχοι από grammar: declare++, iff condition { ...
-            i += 1
+        # Entry point: program
+        self.program()
+        if self.currenttoken.type != TokenFamilyEnum.EOF:
+            self.error("Unexpected tokens after end of program")
         print("-- Finished with no errors --")
+
+    # ---------- Helper methods ----------
+
+    def expect_string(self, value):
+        if self.currenttoken.string != value:
+            self.error(f"Expected '{value}'", expected=value)
+        self.gettoken()
+
+    def expect_type(self, token_type, description=None):
+        if self.currenttoken.type != token_type:
+            desc = description or token_type.name
+            self.error(f"Expected {desc}")
+        self.gettoken()
+
+    def is_statement_start(self, token):
+        if token.type == TokenFamilyEnum.IDENTIFIER:
+            return True  # assignment_stat
+        if token.string in {
+            'if', 'while', 'switchcase', 'whilecase', 'incase',
+            'forcase', 'untilcase', 'input', 'print', 'return'
+        }:
+            return True
+        return False
+
+    # ---------- Grammar implementation ----------
+
+    # program : 'program' ID programblock ;
+    def program(self):
+        self.expect_string('program')
+        self.expect_type(TokenFamilyEnum.IDENTIFIER, "identifier after 'program'")
+        self.programblock()
+
+    # programblock : '{' declarations functions statements_sequence '}' ;
+    def programblock(self):
+        self.expect_string('{')
+        self.declarations()
+        self.functions()
+        self.statements_sequence()
+        self.expect_string('}')
+
+    # declarations : ( 'declare' varlist ';')* ;
+    def declarations(self):
+        while self.currenttoken.string == 'declare':
+            self.gettoken()
+            self.varlist()
+            self.expect_string(';')
+
+    # varlist : ID ( ',' ID )* | ε ;
+    def varlist(self):
+        if self.currenttoken.type == TokenFamilyEnum.IDENTIFIER:
+            self.gettoken()
+            while self.currenttoken.string == ',':
+                self.gettoken()
+                self.expect_type(TokenFamilyEnum.IDENTIFIER, "identifier in variable list")
+        # ε-production: nothing when no identifier
+
+    # functions : ( function )* ;
+    def functions(self):
+        while self.currenttoken.string == 'function':
+            self.function()
+
+    # function : 'function' ID formalpars programblock ;
+    def function(self):
+        self.expect_string('function')
+        self.expect_type(TokenFamilyEnum.IDENTIFIER, "function name")
+        self.formalpars()
+        self.programblock()
+
+    # formalpars : '(' formalparlist ')' ;
+    def formalpars(self):
+        self.expect_string('(')
+        self.formalparlist()
+        self.expect_string(')')
+
+    # formalparlist : formalparitem ( ',' formalparitem )* | ε ;
+    def formalparlist(self):
+        if self.currenttoken.string in {'in', 'inout'}:
+            self.formalparitem()
+            while self.currenttoken.string == ',':
+                self.gettoken()
+                self.formalparitem()
+        # ε-production otherwise
+
+    # formalparitem : 'in' ID | 'inout' ID ;
+    def formalparitem(self):
+        if self.currenttoken.string not in {'in', 'inout'}:
+            self.error("Expected 'in' or 'inout' in formal parameter list")
+        self.gettoken()
+        self.expect_type(TokenFamilyEnum.IDENTIFIER, "identifier in formal parameter list")
+
+    # statements : statement | '{' statements_sequence '}' ;
+    def statements(self):
+        if self.currenttoken.string == '{':
+            self.gettoken()
+            self.statements_sequence()
+            self.expect_string('}')
+        else:
+            self.statement()
+
+    # statements_sequence : statement ( ';' statement )* | ε ;
+    def statements_sequence(self):
+        if self.is_statement_start(self.currenttoken):
+            self.statement()
+            while self.currenttoken.string == ';':
+                self.gettoken()
+                if self.is_statement_start(self.currenttoken):
+                    self.statement()
+                else:
+                    break
+        # ε-production otherwise
+
+    # statement : assignment_stat | if_stat | while_stat | switchcase_stat
+    #           | whilecase_stat | incase_stat | forcase_stat | untilcase_stat
+    #           | input_stat | print_stat | return_stat ;
+    def statement(self):
+        if self.currenttoken.type == TokenFamilyEnum.IDENTIFIER:
+            self.assignment_stat()
+        elif self.currenttoken.string == 'if':
+            self.if_stat()
+        elif self.currenttoken.string == 'while':
+            self.while_stat()
+        elif self.currenttoken.string == 'switchcase':
+            self.switchcase_stat()
+        elif self.currenttoken.string == 'whilecase':
+            self.whilecase_stat()
+        elif self.currenttoken.string == 'incase':
+            self.incase_stat()
+        elif self.currenttoken.string == 'forcase':
+            self.forcase_stat()
+        elif self.currenttoken.string == 'untilcase':
+            self.untilcase_stat()
+        elif self.currenttoken.string == 'input':
+            self.input_stat()
+        elif self.currenttoken.string == 'print':
+            self.print_stat()
+        elif self.currenttoken.string == 'return':
+            self.return_stat()
+        else:
+            self.error("Invalid statement start")
+
+    # assignment_stat : ID ':=' expression ;
+    def assignment_stat(self):
+        self.expect_type(TokenFamilyEnum.IDENTIFIER, "identifier in assignment")
+        if self.currenttoken.type != TokenFamilyEnum.ASSIGNMENT or self.currenttoken.string != ':=':
+            self.error("Expected ':=' in assignment", expected=":=")
+        self.gettoken()
+        self.expression()
+
+    # if_stat : 'if' condition statements elsepart ;
+    def if_stat(self):
+        self.expect_string('if')
+        self.condition()
+        self.statements()
+        self.elsepart()
+
+    # elsepart : 'else' statements | ε ;
+    def elsepart(self):
+        if self.currenttoken.string == 'else':
+            self.gettoken()
+            self.statements()
+
+    # while_stat : 'while' condition statements ;
+    def while_stat(self):
+        self.expect_string('while')
+        self.condition()
+        self.statements()
+
+    # switchcase_stat :
+    #   'switchcase' ( 'when' condition ':' statements )* 'default' ':' statements ;
+    def switchcase_stat(self):
+        self.expect_string('switchcase')
+        while self.currenttoken.string == 'when':
+            self.gettoken()
+            self.condition()
+            self.expect_string(':')
+            self.statements()
+        self.expect_string('default')
+        self.expect_string(':')
+        self.statements()
+
+    # whilecase_stat :
+    #   'whilecase' ( 'when' condition ':' statements )* 'default' ':' statements ;
+    def whilecase_stat(self):
+        self.expect_string('whilecase')
+        while self.currenttoken.string == 'when':
+            self.gettoken()
+            self.condition()
+            self.expect_string(':')
+            self.statements()
+        self.expect_string('default')
+        self.expect_string(':')
+        self.statements()
+
+    # incase_stat : 'incase' ( 'when' condition ':' statements )* ;
+    def incase_stat(self):
+        self.expect_string('incase')
+        while self.currenttoken.string == 'when':
+            self.gettoken()
+            self.condition()
+            self.expect_string(':')
+            self.statements()
+
+    # forcase_stat : 'forcase' ID '=' INTEGER ( 'when' condition ':' statements )* ;
+    def forcase_stat(self):
+        self.expect_string('forcase')
+        self.expect_type(TokenFamilyEnum.IDENTIFIER, "identifier after 'forcase'")
+        self.expect_string('=')
+        self.expect_type(TokenFamilyEnum.NUMBER, "integer value after '=' in forcase")
+        while self.currenttoken.string == 'when':
+            self.gettoken()
+            self.condition()
+            self.expect_string(':')
+            self.statements()
+
+    # untilcase_stat :
+    #   'untilcase' ( 'when' condition ':' statements )* 'until' condition ;
+    def untilcase_stat(self):
+        self.expect_string('untilcase')
+        while self.currenttoken.string == 'when':
+            self.gettoken()
+            self.condition()
+            self.expect_string(':')
+            self.statements()
+        self.expect_string('until')
+        self.condition()
+
+    # input_stat : 'input' ID ;
+    def input_stat(self):
+        self.expect_string('input')
+        self.expect_type(TokenFamilyEnum.IDENTIFIER, "identifier in input statement")
+
+    # print_stat : 'print' expression ;
+    def print_stat(self):
+        self.expect_string('print')
+        self.expression()
+
+    # return_stat : 'return' expression ;
+    def return_stat(self):
+        self.expect_string('return')
+        self.expression()
+
+    # actualpars : '(' actualparlist ')' ;
+    def actualpars(self):
+        self.expect_string('(')
+        self.actualparlist()
+        self.expect_string(')')
+
+    # actualparlist : actualparitem ( ',' actualparitem )* | ε ;
+    def actualparlist(self):
+        if self.currenttoken.string in {'in', 'inout'}:
+            self.actualparitem()
+            while self.currenttoken.string == ',':
+                self.gettoken()
+                self.actualparitem()
+        # ε-production otherwise
+
+    # actualparitem : 'in' expression | 'inout' ID ;
+    def actualparitem(self):
+        if self.currenttoken.string == 'in':
+            self.gettoken()
+            self.expression()
+        elif self.currenttoken.string == 'inout':
+            self.gettoken()
+            self.expect_type(TokenFamilyEnum.IDENTIFIER, "identifier in inout actual parameter")
+        else:
+            self.error("Expected 'in' or 'inout' in actual parameter list")
+
+    # condition : boolterm ( 'or' boolterm )* ;
+    def condition(self):
+        self.boolterm()
+        while self.currenttoken.string == 'or':
+            self.gettoken()
+            self.boolterm()
+
+    # boolterm : boolfactor ( 'and' boolfactor )* ;
+    def boolterm(self):
+        self.boolfactor()
+        while self.currenttoken.string == 'and':
+            self.gettoken()
+            self.boolfactor()
+
+    # boolfactor :
+    #   'not' '[' condition ']'
+    # | '[' condition ']'
+    # | expression relational_oper expression ;
+    def boolfactor(self):
+        if self.currenttoken.string == 'not':
+            self.gettoken()
+            self.expect_string('[')
+            self.condition()
+            self.expect_string(']')
+        elif self.currenttoken.string == '[':
+            self.gettoken()
+            self.condition()
+            self.expect_string(']')
+        else:
+            self.expression()
+            self.relational_oper()
+            self.expression()
+
+    # expression : optional_sign term ( add_oper term )* ;
+    def expression(self):
+        self.optional_sign()
+        self.term()
+        while self.currenttoken.string in {'+', '-'}:
+            self.add_oper()
+            self.term()
+
+    # term : factor ( mul_oper factor )* ;
+    def term(self):
+        self.factor()
+        while self.currenttoken.string in {'*', '/'}:
+            self.mul_oper()
+            self.factor()
+
+    # factor : INTEGER | '(' expression ')' | ID idtail ;
+    def factor(self):
+        if self.currenttoken.type == TokenFamilyEnum.NUMBER:
+            self.gettoken()
+        elif self.currenttoken.string == '(':
+            self.gettoken()
+            self.expression()
+            self.expect_string(')')
+        elif self.currenttoken.type == TokenFamilyEnum.IDENTIFIER:
+            self.gettoken()
+            self.idtail()
+        else:
+            self.error("Invalid factor")
+
+    # idtail : actualpars | ε ;
+    def idtail(self):
+        if self.currenttoken.string == '(':
+            self.actualpars()
+        # ε-production otherwise
+
+    # relational_oper : '=' | '<=' | '>=' | '<>' | '<' | '>' ;
+    def relational_oper(self):
+        if self.currenttoken.string in {'=', '<=', '>=', '<>', '<', '>'}:
+            self.gettoken()
+        else:
+            self.error("Expected relational operator (=, <, >, <>, <=, >=)")
+
+    # add_oper : '+' | '-' ;
+    def add_oper(self):
+        if self.currenttoken.string in {'+', '-'}:
+            self.gettoken()
+        else:
+            self.error("Expected '+' or '-'")
+
+    # mul_oper : '*' | '/' ;
+    def mul_oper(self):
+        if self.currenttoken.string in {'*', '/'}:
+            self.gettoken()
+        else:
+            self.error("Expected '*' or '/'")
+
+    # optional_sign : add_oper | ε ;
+    def optional_sign(self):
+        if self.currenttoken.string in {'+', '-'}:
+            self.gettoken()
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Error: Usage python compiler.py <filename>.c++")
-        print("Exiting...")
-        sys.exit(1)
-
-    if not sys.argv[1].endswith('.c++'):
-        print("Error: File must be of .c++ type")
-        print("Exiting...")
+        print("Error: Usage: python compiler.py <filename>.c++")
         sys.exit(1)
 
     filename = sys.argv[1]
+    if not filename.endswith('.c++'):
+        print("Error: File must end with .c++")
+        sys.exit(1)
 
     lexer = Lex(filename)
     tokenlist = lexer.analyze()
