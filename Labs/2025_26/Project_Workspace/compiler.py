@@ -23,17 +23,17 @@ class TokenFamilyEnum(Enum):
     ERROR = auto()
 
 # CASE++ supported characters (ίδιοι με CASE)
-ALLOWEDCHARS = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
+ALLOWEDCHARS = "αβγδεζηθικλμνξοπρσςτυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩάέήίόύώΐΰϊϋabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789"
 
 # CASE++ KEYWORDS (ΝΕΑ - προσαρμοσμένα από grammar/spec σου)
 KEYWORDS = {
-    'program', 'declare++', 'function++', 'in++', 'inout++', 
-    'iff', 'elsee', 'whilee', 'switchcase++', 'whilecase++', 'incase++', 
-    'forcase++', 'untilcase++', 'print++', 'input++', 'return++', 
-    'and++', 'or++', 'not++', 'when', 'defaultt', 'until'
+    'program', 'declare', 'function', 'in', 'inout', 
+    'if', 'else', 'while', 'switchcase', 'whilecase', 'incase', 
+    'forcase', 'untilcase', 'print', 'input', 'return', 
+    'and', 'or', 'not', 'when', 'default', 'until'
 }
 
-# Operators & symbols (ίδιοι + νέα για Case++)
+# Operators & symbols
 OPSANDSYMBOLS = {
     '+': (TokenFamilyEnum.OPERATOR, '+'),
     '-': (TokenFamilyEnum.OPERATOR, '-'),
@@ -44,8 +44,7 @@ OPSANDSYMBOLS = {
     '(': (TokenFamilyEnum.GROUPSYMBOL, '('),
     ')': (TokenFamilyEnum.GROUPSYMBOL, ')'),
     '{': (TokenFamilyEnum.GROUPSYMBOL, '{'),
-    '}': (TokenFamilyEnum.GROUPSYMBOL, '}'),
-    # Νέα για Case++: π.χ. '**' για power αν χρειάζεται
+    '}': (TokenFamilyEnum.GROUPSYMBOL, '}')
 }
 
 WHITESPACES = set(' \t\n\r')
@@ -160,18 +159,21 @@ class Lex:
             self.nextchar()
             return Token(word, tokentype, self.currentline, self.filename)
 
-        # Comments /* */
-        if self.currentchar == '/':
-            self.nextchar()
-            if self.currentchar == '*':
-                self.skipwhitespaces()
-                self.nextchar()
-                self.nextchar()
-                return self.gettoken()
-        errorchar = self.currentchar
-        self.nextchar()
-        self.throwLexError("InvalidTokenError", self.currentline, errorchar)
-        return Token(errorchar, TokenFamilyEnum.ERROR, self.currentline, self.filename)
+        # # Comments /* */
+        # if self.currentchar == '/':
+        #     self.nextchar()
+        #     if self.currentchar == '/':
+        #         self.nextline()
+        #         self.nextchar()
+        #     if self.currentchar == '*':
+        #         self.skipwhitespaces()
+        #         self.nextchar()
+        #         self.nextchar()
+        #         return self.gettoken()
+        # errorchar = self.currentchar
+        # self.nextchar()
+        # self.throwLexError("InvalidTokenError", self.currentline, errorchar)
+        # return Token(errorchar, TokenFamilyEnum.ERROR, self.currentline, self.filename)
 
     def analyze(self):
         tokens = []
@@ -237,12 +239,12 @@ class Syntax:
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Error: Usage python compiler.py <filename>.casepp")
+        print("Error: Usage python compiler.py <filename>.c++")
         print("Exiting...")
         sys.exit(1)
 
-    if not sys.argv[1].endswith('.casepp'):
-        print("Error: File must be of .casepp type")
+    if not sys.argv[1].endswith('.c++'):
+        print("Error: File must be of .c++ type")
         print("Exiting...")
         sys.exit(1)
 
